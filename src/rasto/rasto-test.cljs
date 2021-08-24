@@ -4,9 +4,11 @@
   itself. We call the function that creates the GUI from here and this
   kicks everything else off."
   (:require
+   [rasto.core :as rcore :refer [make-raster raster-view]]
    [reagent.dom :as rd]
    [clojure.string :as str]
-   [reagent.core :as reagent :refer [atom]]))
+   [reagent.core :as reagent :refer [atom]]
+   [cljs.pprint :as pp :refer [pprint]]))
 
 (enable-console-print!)
 
@@ -15,7 +17,9 @@
   "Creates the app and all its controls.  Everything we use is called
   from here."
   []
-  [:div {} "RASTO-TEST"])
+  (let [raster (make-raster [4 3] [200 150] "cell")
+        _ (raster-view raster)]
+    [:div {} "RASTO-TEST"]))
 
 
 
