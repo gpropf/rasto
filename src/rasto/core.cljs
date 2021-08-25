@@ -55,8 +55,9 @@
 
 
 
-(defn raster-view [raster]
-  (let [[w h] (:dimensions raster)
+(defn raster-view [raster-atom]
+  (let [raster @raster-atom
+        [w h] (:dimensions raster)
         [sw sh] (:screen-dimensions raster)]
     [:svg {:id (rut/key-to-string (:id raster))
            :style        {:margin-left "0.5em"}
