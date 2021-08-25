@@ -17,9 +17,13 @@
   "Creates the app and all its controls.  Everything we use is called
   from here."
   []
-  (let [raster (make-raster [4 3] [200 150] "cell")
-        _ (raster-view raster)]
-    [:div {} "RASTO-TEST"]))
+  (let [raster (make-raster [4 3] [200 150] "cell" :rst1)
+        ]
+    [:div {} "RASTO-TEST"
+     [raster-view raster]
+
+
+     ]))
 
 
 
