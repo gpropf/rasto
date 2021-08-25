@@ -29,6 +29,32 @@
   )
 
 
+(defn relative-xy-to-grid-xy
+  "For the given raster transform screen coordinates relative to the upper-left corner of its
+  svg element into grid coordinates using its internal grid system.  Returns an [int int] vec."
+  [[x y] raster]
+  (let [[w h] (:dimensions raster)
+        [sw sh] (:screen-dimensions raster)
+
+        width-to-screen-width-ratio (/ w sw)
+        height-to-screen-height-ratio (/ h sh)]
+    (map #(int %) [(* x width-to-screen-width-ratio) (* y height-to-screen-height-ratio)])))
+
+
+(defn on-mouse-over-raster
+  "Uses some attributes of the raster to decide how to set up the
+  svg area to translate mouse clicks to grid locations."
+  [raster]
+  (fn [mev]
+    (let [[x y] (relative-xy-to-grid-xy
+                 (rut/position-relative-to-upper-left
+                  mev (rut/key-to-string (:id raster))) raster)
+          rfid (.-id (.-target mev))]
+      (println "Mousing over " (:id raster) ":" rfid ":" [x y])
+      #_(swap! app-state assoc :last-mouse-location [rfid [x y]]))))
+
+
+
 (defn raster-view [raster]
   (let [[w h] (:dimensions raster)
         [sw sh] (:screen-dimensions raster)]
@@ -37,7 +63,7 @@
            :stroke       "darkgrey"
            :stroke-width 0.02
            :fill         "dodgerblue"
-           :class        "drawing raster"
+           ;:class        "drawing raster"
            :height       sh
            :width        sw
            :viewBox [0 0 w h]
@@ -45,7 +71,7 @@
                                     (.preventDefault ev)
                                     (delete-raster! (:id raster)) false)
            :on-click nil #_(onclick-raster raster)
-           :on-mouse-move nil #_(on-mouse-over-raster raster)
+           :on-mouse-move (on-mouse-over-raster raster)
            :preserveAspectRatio "none"}
      [:rect {:key    :bkgd-rect
              :id     :bkgd-rect
