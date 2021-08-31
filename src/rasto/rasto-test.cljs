@@ -8,11 +8,37 @@
    [reagent.dom :as rd]
    [clojure.string :as str]
    [reagent.core :as reagent :refer [atom]]
-   [cljs.pprint :as pp :refer [pprint]]))
+   [cljs.pprint :as pp :refer [pprint]]
+   [rasto.util :as rut]))
 
 (enable-console-print!)
 
-(def raster-atom (atom (make-raster [60 40] [600 400] 1 :rst1)))
+(defn on-mouse-over-raster
+  "Uses some attributes of the raster to decide how to set up the
+  svg area to translate mouse clicks to grid locations."
+  [raster-atom]
+  (fn [mev]
+    (let [raster @raster-atom
+          [x y] (rcore/relative-xy-to-grid-xy
+                 (rut/position-relative-to-upper-left
+                  mev (rut/key-to-string (:id raster))) raster)
+          ]
+      (println "Mousing over " (:id raster) ":" [x y])
+      (swap! raster-atom assoc :last-mouse-location [x y]))))
+
+
+(defn on-mouse-click-raster
+  ""
+  [raster-atom]
+  (fn [mev]
+    (let [raster @raster-atom
+          last-mouse-location (:last-mouse-location raster)]
+      (reset! raster-atom (rcore/set-pixel raster last-mouse-location 5))
+      (println "Click at: " last-mouse-location))))
+
+
+(def raster-atom (atom (make-raster [60 40] [600 400] 0 :rst1
+                                    on-mouse-over-raster on-mouse-click-raster)))
 
 
 (defonce cfg {; :off-pixel-color "#F5F5DC"

@@ -7,7 +7,8 @@
    [rasto.util :as rut]))
 
 
-(defrecord Raster [dimensions screen-dimensions raw-data id])
+(defrecord Raster [dimensions screen-dimensions raw-data id hover-fn
+                   left-click-fn right-click-fn])
 
 
 (defn raw-data-array
@@ -22,8 +23,8 @@
 
 
 
-(defn make-raster [[w h] [sw sh] default-value id]
-  (->Raster [w h] [sw sh] (raw-data-array [w h] default-value) id)
+(defn make-raster [[w h] [sw sh] default-value id hover-fn left-click-fn]
+  (->Raster [w h] [sw sh] (raw-data-array [w h] default-value) id hover-fn left-click-fn nil)
 
 
   )
@@ -40,8 +41,11 @@
         height-to-screen-height-ratio (/ h sh)]
     (map #(int %) [(* x width-to-screen-width-ratio) (* y height-to-screen-height-ratio)])))
 
+(defn set-pixel [raster [x y] pixel-state]
+  (assoc-in raster [:raw-data x y] pixel-state))
 
-(defn on-mouse-over-raster
+
+#_(defn on-mouse-over-raster
   "Uses some attributes of the raster to decide how to set up the
   svg area to translate mouse clicks to grid locations."
   [raster-atom]
@@ -54,21 +58,20 @@
       (println "Mousing over " (:id raster) ":" [x y])
       (swap! raster-atom assoc :last-mouse-location [x y]))))
 
-(defn on-mouse-click-raster
+#_(defn on-mouse-click-raster
   ""
   [raster-atom]
   (fn [mev]
     (let [raster @raster-atom
           last-mouse-location (:last-mouse-location raster)]
-      #_(swap! raster-atom update )
+      (reset! raster-atom (set-pixel raster last-mouse-location 5) )
       (println "Click at: " last-mouse-location)
 
 
       )))
 
 
-(defn set-pixel [raster [x y] pixel-state]
-  (assoc-in raster [:raw-data x y] pixel-state))
+
 
 
 (defn list-pixels
@@ -107,8 +110,8 @@
            :on-context-menu nil #_(fn [ev]
                                     (.preventDefault ev)
                                     (delete-raster! (:id raster)) false)
-           :on-click (on-mouse-click-raster raster-atom)
-           :on-mouse-move (on-mouse-over-raster raster-atom)
+           :on-click ((:left-click-fn raster) raster-atom)
+           :on-mouse-move ((:hover-fn raster) raster-atom)
            :preserveAspectRatio "none"}
      [:rect {:key    :bkgd-rect
              :id     :bkgd-rect
