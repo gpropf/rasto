@@ -54,6 +54,9 @@
       #_(swap! app-state assoc :last-mouse-location [rfid [x y]]))))
 
 
+(defn set-pixel [raster [x y] pixel-state]
+  (assoc-in raster [:raw-data x y] pixel-state))
+
 
 (defn raster-view [raster-atom]
   (let [raster @raster-atom

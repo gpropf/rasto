@@ -12,13 +12,14 @@
 
 (enable-console-print!)
 
+(def raster-atom (atom (make-raster [4 3] [200 150] "cell" :rst1)))
+
 
 (defn app
   "Creates the app and all its controls.  Everything we use is called
   from here."
   []
-  (let [raster-atom (atom (make-raster [4 3] [200 150] "cell" :rst1))
-        ]
+  (let []
     [:div {} "RASTO-TEST"
      [raster-view raster-atom]
 
