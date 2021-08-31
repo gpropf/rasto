@@ -44,24 +44,57 @@
 (defn on-mouse-over-raster
   "Uses some attributes of the raster to decide how to set up the
   svg area to translate mouse clicks to grid locations."
-  [raster]
+  [raster-atom]
   (fn [mev]
-    (let [[x y] (relative-xy-to-grid-xy
+    (let [raster @raster-atom
+          [x y] (relative-xy-to-grid-xy
                  (rut/position-relative-to-upper-left
                   mev (rut/key-to-string (:id raster))) raster)
           rfid (.-id (.-target mev))]
-      (println "Mousing over " (:id raster) ":" rfid ":" [x y])
-      #_(swap! app-state assoc :last-mouse-location [rfid [x y]]))))
+      (println "Mousing over " (:id raster) ":" [x y])
+      (swap! raster-atom assoc :last-mouse-location [x y]))))
+
+(defn on-mouse-click-raster
+  ""
+  [raster-atom]
+  (fn [mev]
+    (let [raster @raster-atom
+          last-mouse-location (:last-mouse-location raster)]
+      #_(swap! raster-atom update )
+      (println "Click at: " last-mouse-location)
+
+
+      )))
 
 
 (defn set-pixel [raster [x y] pixel-state]
   (assoc-in raster [:raw-data x y] pixel-state))
 
 
-(defn raster-view [raster-atom]
+(defn list-pixels
+  "In English:
+   1. Create a row-col indexed map of the pixel values in :rule-array
+   2. Filter that map based on whether the pixel states are greater than 0
+   3. Use apply/concat to flatten the results as in the example in
+      https://clojuredocs.org/clojure.core/concat
+   4. Return the results as a vector of 3-vectors."
+  [raster]
+  (vec (map #(-> % vec)
+            (apply concat (map-indexed
+                           (fn [col e] (let [value-mapping (map-indexed
+                                                            (fn [row ee] [col,row,ee]) e)]
+                                         (filter (fn [[_,_,v]] (> v 0)) value-mapping)))
+                           (:raw-data raster))))))
+
+
+
+
+
+(defn raster-view [raster-atom cfg]
   (let [raster @raster-atom
         [w h] (:dimensions raster)
-        [sw sh] (:screen-dimensions raster)]
+        [sw sh] (:screen-dimensions raster)
+        pixels-to-show (list-pixels raster)]
     [:svg {:id (rut/key-to-string (:id raster))
            :style        {:margin-left "0.5em"}
            :stroke       "darkgrey"
@@ -74,138 +107,22 @@
            :on-context-menu nil #_(fn [ev]
                                     (.preventDefault ev)
                                     (delete-raster! (:id raster)) false)
-           :on-click nil #_(onclick-raster raster)
-           :on-mouse-move (on-mouse-over-raster raster)
+           :on-click (on-mouse-click-raster raster-atom)
+           :on-mouse-move (on-mouse-over-raster raster-atom)
            :preserveAspectRatio "none"}
      [:rect {:key    :bkgd-rect
              :id     :bkgd-rect
              :width w
              :height h
              :fill   "grey"}]
-
-     #_[:svg
-        [:rect {:key    bkgd-rect-key
-                :id     bkgd-rect-key
-                :width  (:width raster)
-                :height (:height raster)
-                :fill   ((:pixel-color-map cfg) 0)}]
-        [:path {:key          grid-path-key
-                :id           grid-path-key
-                :d            (raster-grid raster)
-                :stroke       "blue"
-                :stroke-width 0.02}]
-        (map (fn [[x y pixel-state]]
-               (let [pixel-key (rut/key-to-string "pixel" [x y])]
-                 ^{:key (rut/genkey "fffff")}
-                 [:rect {:key    pixel-key
-                         :id     pixel-key
-                         :x      x
-                         :y      y
-                         :width  1
-                         :height 1
-                         :fill   ((:pixel-color-map cfg) pixel-state)}]))
-             pixels-to-show)
-        #_(when @murf/debug
-            (let [mask-pixels-to-show
-                  (:updated-pixel-list (:da_1 (:rules @app-state)))
-                  mask-pixel-count (count mask-pixels-to-show)]
-              (map (fn [[x y _] i]
-                     (let [pixel-key
-                           (rut/key-to-string "-mask-pixel" [x [i y]])]
-                       [:rect {:key    pixel-key
-                               :id     pixel-key
-                               :opacity 0.7
-                               :x      x
-                               :y      y
-                               :width  1
-                               :height 1
-                               :fill   "99bb99"}]))
-                   mask-pixels-to-show (range mask-pixel-count))))]])
-
-  #_(pprint (:dimensions raster))
-  #_(pprint (:raw-data raster)))
-
-
-#_(defn raster-view ;old rule-frame-view func with the name changed.
-  "Produces the SVG area in which the RF will be displayed."
-  ([raster]
-   (raster-view raster true))
-  ([raster ^boolean display-name?]
-   (raster-view raster display-name? 1))
-  ([raster ^boolean display-name? tab-index]
-   ^{:key (rut/genkey (:id raster))}
-   (when raster
-     (let
-      [pixels-to-show (murf/list-pixels-rf raster)
-       bkgd-rect-key  (rut/genkey "bkgd-rect-key_")
-       grid-path-key  (rut/genkey "grid-path-key_")]
-       [:div
-        {:tab-index tab-index
-         :key (:id raster)
-         ;:on-key-down
-         #_(fn [event]
-           (let [pixel-state (- (int (.-keyCode event)) 48)
-                 [rfid [x y]] (:last-mouse-location @app-state)
-                 tentative-raster ((keyword rfid) (:rules @app-state))
-                 raster (if (nil? tentative-raster)
-                              (:da_1 (:rules @app-state))
-                              tentative-raster)]
-             (set-pixel! raster [x y] pixel-state)))
-         :style {:position "relative"
-                 :height (str (+ (:screen-height raster) 30) "px")
-                 :float "left"
-                 :margin-top "2em"}}
-        [:svg {:id (rut/key-to-string (:id raster))
-               :style        {:margin-left "0.5em"}
-               :stroke       "darkgrey"
-               :stroke-width 0.02
-               :fill         "dodgerblue"
-               :class        "drawing raster"
-               :height       (:screen-height raster)
-               :width        (:screen-width raster)
-               :viewBox [0 0 (:width raster) (:height raster)]
-               :on-context-menu (fn [ev]
-                                  (.preventDefault ev)
-                                  (delete-raster! (:id raster)) false)
-               :on-click (onclick-raster raster)
-               :on-mouse-move (on-mouse-over-raster raster)
-               :preserveAspectRatio "none"}
-         [:svg
-          [:rect {:key    bkgd-rect-key
-                  :id     bkgd-rect-key
-                  :width  (:width raster)
-                  :height (:height raster)
-                  :fill   ((:pixel-color-map cfg) 0)}]
-          [:path {:key          grid-path-key
-                  :id           grid-path-key
-                  :d            (raster-grid raster)
-                  :stroke       "blue"
-                  :stroke-width 0.02}]
-          (map (fn [[x y pixel-state]]
-                 (let [pixel-key (rut/key-to-string "pixel" [x y])]
-                   ^{:key (rut/genkey "fffff")}
-                   [:rect {:key    pixel-key
-                           :id     pixel-key
-                           :x      x
-                           :y      y
-                           :width  1
-                           :height 1
-                           :fill   ((:pixel-color-map cfg) pixel-state)}]))
-               pixels-to-show)
-          (when @murf/debug
-            (let [mask-pixels-to-show
-                  (:updated-pixel-list (:da_1 (:rules @app-state)))
-                  mask-pixel-count (count mask-pixels-to-show)]
-              (map (fn [[x y _] i]
-                     (let [pixel-key
-                           (rut/key-to-string "-mask-pixel" [x [i y]])]
-                                     [:rect {:key    pixel-key
-                                             :id     pixel-key
-                                             :opacity 0.7
-                                             :x      x
-                                             :y      y
-                                             :width  1
-                                             :height 1
-                                             :fill   "99bb99"}]))
-                   mask-pixels-to-show (range mask-pixel-count))))]]
-        (when display-name? [rf-button-bar raster app-state])]))))
+     (map (fn [[x y pixel-state]]
+            (let [pixel-key (rut/key-to-string "pixel" [x y])]
+              ^{:key (rut/genkey "fffff")}
+              [:rect {:key    pixel-key
+                      :id     pixel-key
+                      :x      x
+                      :y      y
+                      :width  1
+                      :height 1
+                      :fill   ((:pixel-color-map cfg) pixel-state)}]))
+          pixels-to-show)]))
