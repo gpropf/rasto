@@ -13,34 +13,6 @@
 
 (enable-console-print!)
 
-(defn on-mouse-over-raster
-  "Uses some attributes of the raster to decide how to set up the
-  svg area to translate mouse clicks to grid locations."
-  [raster-atom]
-  (fn [mev]
-    (let [raster @raster-atom
-          [x y] (rcore/relative-xy-to-grid-xy
-                 (rut/position-relative-to-upper-left
-                  mev (rut/key-to-string (:id raster))) raster)
-          ]
-      (println "Mousing over " (:id raster) ":" [x y])
-      (swap! raster-atom assoc :last-mouse-location [x y]))))
-
-
-(defn on-mouse-click-raster
-  ""
-  [raster-atom]
-  (fn [mev]
-    (let [raster @raster-atom
-          last-mouse-location (:last-mouse-location raster)]
-      (reset! raster-atom (rcore/set-pixel raster last-mouse-location 5))
-      (println "Click at: " last-mouse-location))))
-
-
-(def raster-atom (atom (make-raster [60 40] [600 400] 0 :rst1
-                                    on-mouse-over-raster on-mouse-click-raster)))
-
-
 (defonce cfg {; :off-pixel-color "#F5F5DC"
               :off-pixel-color "#FFFFFF"
               ;; :on-pixel-color "#1e90ff"
@@ -64,17 +36,66 @@
               :default-starting-rule-frame-index 1
               :default-grid-dimensions "60,40"})
 
+(defn hover-fn
+  "Uses some attributes of the raster to decide how to set up the
+  svg area to translate mouse clicks to grid locations."
+  [raster-atom]
+  (fn [mev]
+    (let [raster @raster-atom
+          [x y] (rcore/relative-xy-to-grid-xy
+                 (rut/position-relative-to-upper-left
+                  mev (rut/key-to-string (:id raster))) raster)
+          ]
+      (println "Mousing over " (:id raster) ":" [x y])
+      (swap! raster-atom assoc :last-mouse-location [x y]))))
+
+
+(defn left-click-fn
+  ""
+  [raster-atom]
+  (fn [mev]
+    (let [raster @raster-atom
+          last-mouse-location (:last-mouse-location raster)]
+      (reset! raster-atom (rcore/set-pixel raster last-mouse-location 101))
+      (println "Click at: " last-mouse-location))))
+
+(defn right-click-fn
+  ""
+  [raster-atom]
+  (fn [mev] (println "Right click placeholder fn triggered for id " (:id @raster-atom) " at " (:last-mouse-location @raster-atom)))
+  )
+
+(def default-cell-state 100)
+
+(defn cell-state-to-color-index-fn
+  ""
+  [cell-state]
+  (- cell-state default-cell-state))
+
+
+(defn cell-is-visible-fn [cell-state]
+  (> (cell-state-to-color-index-fn cell-state) 0)
+  )
+
+
+
+
+(def raster-atom (atom (make-raster
+                        [60 40] [600 400] default-cell-state :rst1
+                        hover-fn left-click-fn right-click-fn
+                        cell-state-to-color-index-fn cell-is-visible-fn)))
+
+
+
+
 
 (defn app
   "Creates the app and all its controls.  Everything we use is called
   from here."
   []
   (let []
-    [:div {} "RASTO-TEST"
-     [raster-view raster-atom cfg]
-
-
-     ]))
+    [:div {}
+     [raster-view raster-atom cfg]]))
 
 
 

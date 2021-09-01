@@ -8,7 +8,7 @@
 
 
 (defrecord Raster [dimensions screen-dimensions raw-data id hover-fn
-                   left-click-fn right-click-fn])
+                   left-click-fn right-click-fn cell-state-to-color-index-fn cell-is-visible-fn])
 
 
 (defn raw-data-array
@@ -23,8 +23,8 @@
 
 
 
-(defn make-raster [[w h] [sw sh] default-value id hover-fn left-click-fn]
-  (->Raster [w h] [sw sh] (raw-data-array [w h] default-value) id hover-fn left-click-fn nil)
+(defn make-raster [[w h] [sw sh] default-value id hover-fn left-click-fn right-click-fn cell-state-to-color-index-fn cell-is-visible-fn]
+  (->Raster [w h] [sw sh] (raw-data-array [w h] default-value) id hover-fn left-click-fn right-click-fn cell-state-to-color-index-fn cell-is-visible-fn)
 
 
   )
@@ -86,10 +86,23 @@
             (apply concat (map-indexed
                            (fn [col e] (let [value-mapping (map-indexed
                                                             (fn [row ee] [col,row,ee]) e)]
-                                         (filter (fn [[_,_,v]] (> v 0)) value-mapping)))
+                                         (filter (fn [[_,_,v]]
+                                                   ((:cell-is-visible-fn raster) v)) value-mapping)))
                            (:raw-data raster))))))
 
 
+
+
+(defn raster-view-grid
+  ""
+  [raster]
+  (let [[w h] (:dimensions raster)]
+    (concat (map
+           (fn [y] (str "M 0 " y " L " w " " y))
+           (range 0 h))
+          (map
+           (fn [x] (str "M " x " 0 L " x " " h))
+           (range 0 w)))))
 
 
 
@@ -97,7 +110,8 @@
   (let [raster @raster-atom
         [w h] (:dimensions raster)
         [sw sh] (:screen-dimensions raster)
-        pixels-to-show (list-pixels raster)]
+        pixels-to-show (list-pixels raster)
+        grid-path-key  (rut/genkey "grid-path-key_")]
     [:svg {:id (rut/key-to-string (:id raster))
            :style        {:margin-left "0.5em"}
            :stroke       "darkgrey"
@@ -107,9 +121,7 @@
            :height       sh
            :width        sw
            :viewBox [0 0 w h]
-           :on-context-menu nil #_(fn [ev]
-                                    (.preventDefault ev)
-                                    (delete-raster! (:id raster)) false)
+           :on-context-menu ((:right-click-fn raster) raster-atom)
            :on-click ((:left-click-fn raster) raster-atom)
            :on-mouse-move ((:hover-fn raster) raster-atom)
            :preserveAspectRatio "none"}
@@ -117,15 +129,21 @@
              :id     :bkgd-rect
              :width w
              :height h
-             :fill   "grey"}]
-     (map (fn [[x y pixel-state]]
-            (let [pixel-key (rut/key-to-string "pixel" [x y])]
-              ^{:key (rut/genkey "fffff")}
+             :fill   "#e6ffff"}]
+     [:path {:key          grid-path-key
+             :id           grid-path-key
+             :d            (raster-view-grid raster)
+             :stroke       "lightgrey"
+             :stroke-width 0.02}]
+     (map (fn [[x y cell-state]]
+            (let [pixel-key (rut/key-to-string "cell" [x y])]
+              ^{:key (rut/genkey "cell")}
               [:rect {:key    pixel-key
                       :id     pixel-key
                       :x      x
                       :y      y
                       :width  1
                       :height 1
-                      :fill   ((:pixel-color-map cfg) pixel-state)}]))
+                      :fill   ((:pixel-color-map cfg)
+                               ((:cell-state-to-color-index-fn raster) cell-state))}]))
           pixels-to-show)]))
