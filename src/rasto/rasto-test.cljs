@@ -13,11 +13,14 @@
 
 (enable-console-print!)
 
-(defonce cfg {; :off-pixel-color "#F5F5DC"
-              :off-pixel-color "#FFFFFF"
-              ;; :on-pixel-color "#1e90ff"
-              :on-pixel-color "#555555"
-              :pixel-color-map {0 "#F5F5DC"
+(def default-cell-state 100)
+
+
+(defonce cfg {; :off-cell-color "#F5F5DC"
+              :off-cell-color "#FFFFFF"
+              ;; :on-cell-color "#1e90ff"
+              :on-cell-color "#555555"
+              :cell-color-map {0 "#F5F5DC"
                                 1 "#00FF00"
                                 2 "#00AA00"
                                 3 "#FF00FF"
@@ -36,9 +39,9 @@
               :default-starting-rule-frame-index 1
               :default-grid-dimensions "60,40"})
 
+
 (defn hover-fn
-  "Uses some attributes of the raster to decide how to set up the
-  svg area to translate mouse clicks to grid locations."
+  "This the function we feed to the Raster for hover events."
   [raster-atom]
   (fn [mev]
     (let [raster @raster-atom
@@ -51,42 +54,41 @@
 
 
 (defn left-click-fn
-  ""
+  "Left mouse click fn"
   [raster-atom]
   (fn [mev]
     (let [raster @raster-atom
           last-mouse-location (:last-mouse-location raster)]
-      (reset! raster-atom (rcore/set-pixel raster last-mouse-location 101))
+      (reset! raster-atom (rcore/set-cell raster last-mouse-location 101))
       (println "Click at: " last-mouse-location))))
 
-(defn right-click-fn
-  ""
-  [raster-atom]
-  (fn [mev] (println "Right click placeholder fn triggered for id " (:id @raster-atom) " at " (:last-mouse-location @raster-atom)))
-  )
 
-(def default-cell-state 100)
+(defn right-click-fn
+  "Right mouse click fn."
+  [raster-atom]
+  (fn [mev] (println "Right click placeholder fn triggered for
+  id " (:id @raster-atom) " at " (:last-mouse-location @raster-atom))))
+
 
 (defn cell-state-to-color-index-fn
-  ""
+  "This is a simple example of how the translation from cell state to
+  color index works. It just subtracts the default cell value to
+  produce a color index."
   [cell-state]
   (- cell-state default-cell-state))
 
 
-(defn cell-is-visible-fn [cell-state]
-  (> (cell-state-to-color-index-fn cell-state) 0)
-  )
-
-
+(defn cell-is-visible-fn
+  "This is a simple example of how we decide if a cell is visible. In
+  this case we just return true if the color index is > 0."
+  [cell-state]
+  (> (cell-state-to-color-index-fn cell-state) 0) )
 
 
 (def raster-atom (atom (make-raster
                         [60 40] [600 400] default-cell-state :rst1
                         hover-fn left-click-fn right-click-fn
                         cell-state-to-color-index-fn cell-is-visible-fn)))
-
-
-
 
 
 (defn app
@@ -96,7 +98,6 @@
   (let []
     [:div {}
      [raster-view raster-atom cfg]]))
-
 
 
 (defn render-app
@@ -113,9 +114,6 @@
 
 (defn ^:after-load re-render []
   (render-app))
-
-
-
 
 
 (defonce start-up (render-app))

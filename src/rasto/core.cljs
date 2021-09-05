@@ -7,8 +7,16 @@
    [rasto.util :as rut]))
 
 
-(defrecord Raster [dimensions screen-dimensions raw-data id hover-fn
-                   left-click-fn right-click-fn cell-state-to-color-index-fn cell-is-visible-fn])
+(defrecord Raster [dimensions ;width and height in abstract units as a 2-vec: [w h].
+                   screen-dimensions ;screen width and height in pixels: [sw sh].
+                   raw-data ;vector of vectors where each inner vec is a column.
+                   id ;unique keyword identifying Raster object.
+                   hover-fn ;run this on mouse hover.
+                   left-click-fn ;run for left click.
+                   right-click-fn ;run for right click.
+                   cell-state-to-color-index-fn ;translate a cell's state into a color index fn.
+                   cell-is-visible-fn ;decide whether the cell should be visible or not.
+                   ])
 
 
 (defn raw-data-array
@@ -23,16 +31,20 @@
 
 
 
-(defn make-raster [[w h] [sw sh] default-value id hover-fn left-click-fn right-click-fn cell-state-to-color-index-fn cell-is-visible-fn]
-  (->Raster [w h] [sw sh] (raw-data-array [w h] default-value) id hover-fn left-click-fn right-click-fn cell-state-to-color-index-fn cell-is-visible-fn)
-
-
-  )
+(defn make-raster
+  "Constructor function for the Raster."
+  [[w h] [sw sh] default-value id
+   hover-fn left-click-fn right-click-fn
+   cell-state-to-color-index-fn cell-is-visible-fn]
+  (->Raster [w h] [sw sh] (raw-data-array [w h] default-value) id
+            hover-fn left-click-fn right-click-fn
+            cell-state-to-color-index-fn cell-is-visible-fn) )
 
 
 (defn relative-xy-to-grid-xy
-  "For the given raster transform screen coordinates relative to the upper-left corner of its
-  svg element into grid coordinates using its internal grid system.  Returns an [int int] vec."
+  "For the given raster transform screen coordinates relative to the
+  upper-left corner of its svg element into grid coordinates using its
+  internal grid system.  Returns an [int int] vec."
   [[x y] raster]
   (let [[w h] (:dimensions raster)
         [sw sh] (:screen-dimensions raster)
@@ -41,60 +53,35 @@
         height-to-screen-height-ratio (/ h sh)]
     (map #(int %) [(* x width-to-screen-width-ratio) (* y height-to-screen-height-ratio)])))
 
-(defn set-pixel [raster [x y] pixel-state]
-  (assoc-in raster [:raw-data x y] pixel-state))
+
+(defn set-cell
+  "Set the cell at [x y] to cell-state"
+  [raster [x y] cell-state]
+  (assoc-in raster [:raw-data x y] cell-state))
 
 
-#_(defn on-mouse-over-raster
-  "Uses some attributes of the raster to decide how to set up the
-  svg area to translate mouse clicks to grid locations."
-  [raster-atom]
-  (fn [mev]
-    (let [raster @raster-atom
-          [x y] (relative-xy-to-grid-xy
-                 (rut/position-relative-to-upper-left
-                  mev (rut/key-to-string (:id raster))) raster)
-          rfid (.-id (.-target mev))]
-      (println "Mousing over " (:id raster) ":" [x y])
-      (swap! raster-atom assoc :last-mouse-location [x y]))))
-
-#_(defn on-mouse-click-raster
-  ""
-  [raster-atom]
-  (fn [mev]
-    (let [raster @raster-atom
-          last-mouse-location (:last-mouse-location raster)]
-      (reset! raster-atom (set-pixel raster last-mouse-location 5) )
-      (println "Click at: " last-mouse-location)
-
-
-      )))
-
-
-
-
-
-(defn list-pixels
+(defn list-cells
   "In English:
-   1. Create a row-col indexed map of the pixel values in :rule-array
-   2. Filter that map based on whether the pixel states are greater than 0
+   1. Create a row-col indexed map of the cell values in :raw-data
+   2. Filter that map based on whether the :cell-is-visible-fn return true for that cell
    3. Use apply/concat to flatten the results as in the example in
       https://clojuredocs.org/clojure.core/concat
-   4. Return the results as a vector of 3-vectors."
+   4. Return the results as a vector of 3-vectors [x y cell-state]."
   [raster]
   (vec (map #(-> % vec)
             (apply concat (map-indexed
-                           (fn [col e] (let [value-mapping (map-indexed
-                                                            (fn [row ee] [col,row,ee]) e)]
-                                         (filter (fn [[_,_,v]]
-                                                   ((:cell-is-visible-fn raster) v)) value-mapping)))
+                           (fn [col e]
+                             (let [value-mapping
+                                   (map-indexed
+                                    (fn [row ee] [col,row,ee]) e)]
+                               (filter (fn [[_,_,v]]
+                                         ((:cell-is-visible-fn raster) v))
+                                       value-mapping)))
                            (:raw-data raster))))))
 
 
-
-
 (defn raster-view-grid
-  ""
+  "Makes the grid of lines that divide the Raster into cells."
   [raster]
   (let [[w h] (:dimensions raster)]
     (concat (map
@@ -106,11 +93,22 @@
 
 
 
-(defn raster-view [raster-atom cfg]
+(defn raster-view
+  "Provides a visual representation of the Raster and basic
+  interactivity with it to allow the user to modify the contents. The
+  left-click-fn and other mouse action functions are a bit
+  tricky. Instead of being mouse event handlers they must be functions
+  with accept a raster-atom and return a mouse event handler. This is
+  to allow the fields of our Raster object to play a role in the
+  behavior of the mouse event handlers even though they are single
+  valued functions with no room for arbitrary extra args like our
+  raster-atom. See the rasto-test code for examples of how these
+  work."
+  [raster-atom cfg]
   (let [raster @raster-atom
         [w h] (:dimensions raster)
         [sw sh] (:screen-dimensions raster)
-        pixels-to-show (list-pixels raster)
+        cells-to-show (list-cells raster)
         grid-path-key  (rut/genkey "grid-path-key_")]
     [:svg {:id (rut/key-to-string (:id raster))
            :style        {:margin-left "0.5em"}
@@ -136,14 +134,14 @@
              :stroke       "lightgrey"
              :stroke-width 0.02}]
      (map (fn [[x y cell-state]]
-            (let [pixel-key (rut/key-to-string "cell" [x y])]
+            (let [cell-key (rut/key-to-string "cell" [x y])]
               ^{:key (rut/genkey "cell")}
-              [:rect {:key    pixel-key
-                      :id     pixel-key
+              [:rect {:key    cell-key
+                      :id     cell-key
                       :x      x
                       :y      y
                       :width  1
                       :height 1
-                      :fill   ((:pixel-color-map cfg)
+                      :fill   ((:cell-color-map cfg)
                                ((:cell-state-to-color-index-fn raster) cell-state))}]))
-          pixels-to-show)]))
+          cells-to-show)]))
