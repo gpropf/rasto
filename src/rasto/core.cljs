@@ -4,7 +4,8 @@
    [clojure.string :as str]
    [reagent.core :as reagent :refer [atom]]
    [cljs.pprint :as pp :refer [pprint]]
-   [rasto.util :as rut]))
+   [rasto.util :as rut]
+   [rasto.mui :as rm]))
 
 
 (defrecord Raster [dimensions ;width and height in abstract units as a 2-vec: [w h].
@@ -110,7 +111,9 @@
         [sw sh] (:screen-dimensions raster)
         cells-to-show (list-cells raster)
         grid-path-key  (rut/genkey "grid-path-key_")]
-    [:svg {:id (rut/key-to-string (:id raster))
+    [:div
+     [rm/mui-gui ]
+     [:svg {:id (rut/key-to-string (:id raster))
            :style        {:margin-left "0.5em"}
            :stroke       "darkgrey"
            :stroke-width 0.02
@@ -144,4 +147,4 @@
                       :height 1
                       :fill   ((:cell-color-map cfg)
                                ((:cell-state-to-color-index-fn raster) cell-state))}]))
-          cells-to-show)]))
+          cells-to-show)]]))
