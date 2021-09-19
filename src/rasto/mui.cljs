@@ -22,17 +22,31 @@
    [cljs.pprint :as pp :refer [pprint]]
    [rasto.util :as rut]))
 
+
+(def commands {"b"
+               {:args
+                {:w
+                 {:prompt "Width of new brush?"}
+                 :h
+                 {:prompt "Width of new brush?"}}}})
+
+
+
+
+
+
 (defn mui-gui [raster cfg]
   [:div
    [:textarea  {:style {:height "auto"
                         :margin-bottom "5px"
                         :float "right"}
-                :id "description"
+                :id "command-window"
                 :rows "4"
-                :cols "40"
+                :cols "80"
                 :class ""
-                :default-value ""}
-    ]
+                :default-value ""
+                :on-key-press (fn [event] (println (.-key event)))
+                }]
    [:div ;output frame
     ]
    [:div ;maybe status bar or something
