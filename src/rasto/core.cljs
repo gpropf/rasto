@@ -20,6 +20,15 @@
                    ])
 
 
+(def commands {"b"
+               {:args
+                {:w
+                 {:prompt "Width of new brush?"}
+                 :h
+                 {:prompt "Height of new brush?"}}}})
+
+
+
 (defn raw-data-array
   "Returns a raw rule-array cleared to provided value or 0."
   ([[width height] cell-state]
@@ -92,7 +101,10 @@
            (fn [x] (str "M " x " 0 L " x " " h))
            (range 0 w)))))
 
+(defn new-brush [raster-atom ]
 
+
+  )
 
 (defn raster-view
   "Provides a visual representation of the Raster and basic
@@ -112,39 +124,39 @@
         cells-to-show (list-cells raster)
         grid-path-key  (rut/genkey "grid-path-key_")]
     [:div
-     [rm/mui-gui ]
+     [rm/mui-gui (:mui-cfg cfg)]
      [:svg {:id (rut/key-to-string (:id raster))
-           :style        {:margin-left "0.5em"}
-           :stroke       "darkgrey"
-           :stroke-width 0.02
-           :fill         "dodgerblue"
+            :style        {:margin-left "0.5em" :border "medium solid green"}
+            :stroke       "darkgrey"
+            :stroke-width 0.02
+            :fill         "dodgerblue"
            ;:class        "drawing raster"
-           :height       sh
-           :width        sw
-           :viewBox [0 0 w h]
-           :on-context-menu ((:right-click-fn raster) raster-atom)
-           :on-click ((:left-click-fn raster) raster-atom)
-           :on-mouse-move ((:hover-fn raster) raster-atom)
-           :preserveAspectRatio "none"}
-     [:rect {:key    :bkgd-rect
-             :id     :bkgd-rect
-             :width w
-             :height h
-             :fill   "#e6ffff"}]
-     [:path {:key          grid-path-key
-             :id           grid-path-key
-             :d            (raster-view-grid raster)
-             :stroke       "lightgrey"
-             :stroke-width 0.02}]
-     (map (fn [[x y cell-state]]
-            (let [cell-key (rut/key-to-string "cell" [x y])]
-              ^{:key (rut/genkey "cell")}
-              [:rect {:key    cell-key
-                      :id     cell-key
-                      :x      x
-                      :y      y
-                      :width  1
-                      :height 1
-                      :fill   ((:cell-color-map cfg)
-                               ((:cell-state-to-color-index-fn raster) cell-state))}]))
-          cells-to-show)]]))
+            :height       sh
+            :width        sw
+            :viewBox [0 0 w h]
+            :on-context-menu ((:right-click-fn raster) raster-atom)
+            :on-click ((:left-click-fn raster) raster-atom)
+            :on-mouse-move ((:hover-fn raster) raster-atom)
+            :preserveAspectRatio "none"}
+      [:rect {:key    :bkgd-rect
+              :id     :bkgd-rect
+              :width w
+              :height h
+              :fill   "#ffe"}]
+      [:path {:key          grid-path-key
+              :id           grid-path-key
+              :d            (raster-view-grid raster)
+              :stroke       "lightgrey"
+              :stroke-width 0.02}]
+      (map (fn [[x y cell-state]]
+             (let [cell-key (rut/key-to-string "cell" [x y])]
+               ^{:key (rut/genkey "cell")}
+               [:rect {:key    cell-key
+                       :id     cell-key
+                       :x      x
+                       :y      y
+                       :width  1
+                       :height 1
+                       :fill   ((:cell-color-map cfg)
+                                ((:cell-state-to-color-index-fn raster) cell-state))}]))
+           cells-to-show)]]))

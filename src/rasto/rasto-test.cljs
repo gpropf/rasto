@@ -16,28 +16,38 @@
 (def default-cell-state 100)
 
 
-(defonce cfg {; :off-cell-color "#F5F5DC"
-              :off-cell-color "#FFFFFF"
-              ;; :on-cell-color "#1e90ff"
-              :on-cell-color "#555555"
-              :cell-color-map {0 "#F5F5DC"
-                                1 "#00FF00"
-                                2 "#00AA00"
-                                3 "#FF00FF"
-                                4 "#AA00AA"
-                                5 "#00AAFF"
-                                6 "#9090AA"
-                                7 "#888888"}
-              :default-da-screen-width 600
-              :default-da-screen-height 400
-              :default-rule-frame-screen-width 150
-              :default-rule-frame-screen-height 150
-              :default-da-width 60
-              :default-da-height 40
-              :default-download-filename "rules.edn"
-              :default-rf-dimensions "5,5"
-              :default-starting-rule-frame-index 1
-              :default-grid-dimensions "60,40"})
+(defonce
+  rasto-test-cfg {; :off-cell-color "#F5F5DC"
+                  :off-cell-color "#FFFFFF"
+                  ;; :on-cell-color "#1e90ff"
+                  :on-cell-color "#555555"
+                  :cell-color-map {0 "#F5F5DC"
+                                   1 "#00FF00"
+                                   2 "#00AA00"
+                                   3 "#FF00FF"
+                                   4 "#AA00AA"
+                                   5 "#00AAFF"
+                                   6 "#9090AA"
+                                   7 "#888888"}
+                  :default-da-screen-width 600
+                  :default-da-screen-height 400
+                  :default-rule-frame-screen-width 150
+                  :default-rule-frame-screen-height 150
+                  :default-da-width 60
+                  :default-da-height 40
+                  :default-download-filename "rules.edn"
+                  :default-rf-dimensions "5,5"
+                  :default-starting-rule-frame-index 1
+                  :default-grid-dimensions "60,40"
+                  :mui-cfg {:command-window {:style {:height "auto"
+                                                     :margin-bottom "5px"
+                                                     :float "right"}
+                                             :id "command-window"
+                                             :rows "4"
+                                             :cols "60"
+                                             :class ""
+                                             :default-value "TEST"
+                                             }}})
 
 
 (defn hover-fn
@@ -79,14 +89,14 @@
 
 
 (defn cell-is-visible-fn
-  "This is a simple example of how we decide if a cell is visible. In
+  "This is a simple example of how we decide if a cell is visible. I
   this case we just return true if the color index is > 0."
   [cell-state]
   (> (cell-state-to-color-index-fn cell-state) 0) )
 
 
-(def raster-atom (atom (make-raster
-                        [60 40] [600 400] default-cell-state :rst1
+(defonce raster-atom (atom (make-raster
+                        [60 40] [800 600] default-cell-state :rst1
                         hover-fn left-click-fn right-click-fn
                         cell-state-to-color-index-fn cell-is-visible-fn)))
 
@@ -95,9 +105,8 @@
   "Creates the app and all its controls.  Everything we use is called
   from here."
   []
-  (let []
-    [:div {}
-     [raster-view raster-atom cfg]]))
+  [:div {}
+   [raster-view raster-atom rasto-test-cfg]])
 
 
 (defn render-app

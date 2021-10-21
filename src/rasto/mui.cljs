@@ -23,31 +23,37 @@
    [rasto.util :as rut]))
 
 
-(def commands {"b"
-               {:args
-                {:w
-                 {:prompt "Width of new brush?"}
-                 :h
-                 {:prompt "Width of new brush?"}}}})
+(defonce mui-state (atom {:command-buffer ""}))
+
+
+(def mui-cmd-map
+  "Basic Mui commands common to all applications, even those besides Rasto."
+  {"c" (fn [] (swap! mui-state assoc :command-buffer ""))
+
+
+                  })
 
 
 
 
 
 
-(defn mui-gui [raster cfg]
-  [:div
-   [:textarea  {:style {:height "auto"
-                        :margin-bottom "5px"
-                        :float "right"}
-                :id "command-window"
-                :rows "4"
-                :cols "80"
-                :class ""
-                :default-value ""
-                :on-key-press (fn [event] (println (.-key event)))
-                }]
-   [:div ;output frame
-    ]
-   [:div ;maybe status bar or something
-    ]])
+(defn mui-gui [cfg]
+  (let [keystroke-handler (fn [event]
+                            (let [k (.-key event)]
+                              (println (.-key event))
+                              (swap! mui-state update :command-buffer str k)
+
+                              (apply (mui-cmd-map k) [])))]
+
+    [:div
+     (println "CFG: " (:command-window cfg))
+     [:textarea  (merge (:command-window cfg)
+                        {:value (:command-buffer @mui-state)
+                                        ;:on-key-press (fn [event] (println (.-key event)))
+                         :on-key-press keystroke-handler})]
+
+     [:div ;output frame
+      ]
+     [:div ;maybe status bar or something
+      ]]))

@@ -1,0 +1,4 @@
+{
+ :pprint-config false
+ :ring-server-options {:port 9600}
+ }
