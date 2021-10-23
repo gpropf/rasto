@@ -20,12 +20,13 @@
                    ])
 
 
-(def commands {"b"
-               {:args
-                {:w
-                 {:prompt "Width of new brush?"}
-                 :h
-                 {:prompt "Height of new brush?"}}}})
+(def rasto-cfg {:app-cmds
+                {"b"
+                 {:args
+                  {:w
+                   {:prompt "Width of new brush?"}
+                   :h
+                   {:prompt "Height of new brush?"}}}}})
 
 
 
@@ -111,20 +112,22 @@
   interactivity with it to allow the user to modify the contents. The
   left-click-fn and other mouse action functions are a bit
   tricky. Instead of being mouse event handlers they must be functions
-  with accept a raster-atom and return a mouse event handler. This is
+  that accept a raster-atom and return a mouse event handler. This is
   to allow the fields of our Raster object to play a role in the
   behavior of the mouse event handlers even though they are single
   valued functions with no room for arbitrary extra args like our
   raster-atom. See the rasto-test code for examples of how these
   work."
-  [raster-atom cfg]
+  [raster-atom app-cfg]
   (let [raster @raster-atom
         [w h] (:dimensions raster)
         [sw sh] (:screen-dimensions raster)
         cells-to-show (list-cells raster)
         grid-path-key  (rut/genkey "grid-path-key_")]
     [:div
-     [rm/mui-gui (:mui-cfg cfg)]
+    ; (println "rasto/core - CMDS1: ")
+    ; (pprint app-cfg)
+     [rm/mui-gui (merge (:mui-cfg app-cfg)  rasto-cfg)]
      [:svg {:id (rut/key-to-string (:id raster))
             :style        {:margin-left "0.5em" :border "medium solid green"}
             :stroke       "darkgrey"
@@ -157,6 +160,6 @@
                        :y      y
                        :width  1
                        :height 1
-                       :fill   ((:cell-color-map cfg)
+                       :fill   ((:cell-color-map app-cfg)
                                 ((:cell-state-to-color-index-fn raster) cell-state))}]))
            cells-to-show)]]))

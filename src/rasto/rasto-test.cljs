@@ -47,7 +47,8 @@
                                              :cols "60"
                                              :class ""
                                              :default-value "TEST"
-                                             }}})
+                                             }
+                            :app-cmds {}}})
 
 
 (defn hover-fn

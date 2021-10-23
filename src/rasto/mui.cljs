@@ -27,7 +27,7 @@
 
 
 (def mui-cmd-map
-  "Basic Mui commands common to all applications, even those besides Rasto."
+  ;"Basic Mui commands common to all applications, even those besides Rasto."
   {"c" (fn [] (swap! mui-state assoc :command-buffer ""))
 
 
@@ -38,20 +38,39 @@
 
 
 
-(defn mui-gui [cfg]
+(defn mui-gui [app-cfg]
   (let [keystroke-handler (fn [event]
-                            (let [k (.-key event)]
-                              (println (.-key event))
-                              (swap! mui-state update :command-buffer str k)
-
-                              (apply (mui-cmd-map k) [])))]
+                            (let [k (.-key event)
+                                  mui-cmd-map-including-app-cmds
+                                  (merge mui-cmd-map (:app-cmds app-cfg))
+                                  mui-cmd (mui-cmd-map-including-app-cmds k)
+                                  cmd-txtarea (. js/document getElementById  "command-window")]
+                              (println "rasto/mui - CMDS1: " cmd-txtarea)
+                              ;(pprint app-cfg)
+                              (println (repeat 30 "="))
+                              (println "CMDS: " mui-cmd-map-including-app-cmds)
+                              (println "KEY: " (.-key event)
+                                       ", CODE" (.-code event)
+                                       ", KEYCODE" (.-keyCode event)
+                                       ", WHICH" (.-which event)
+                                       ", Alt, Cntr, Shift, Meta" (.-altKey event)
+                                       (.-ctrlKey event)
+                                       (.-shiftKey event)
+                                       (.-metaKey event))
+                              (println "Textarea properties: " (js/jQuery "#command-window"))
+                              (println "Textarea selectionStart: "
+                                       (. cmd-txtarea -selectionStart))
+                              (set! (.. cmd-txtarea -selectionEnd) 4)
+                              (set! (.. cmd-txtarea -selectionStart) 4)
+                              (when mui-cmd (apply mui-cmd []))
+                              (swap! mui-state update :command-buffer str k)) true)]
 
     [:div
-     (println "CFG: " (:command-window cfg))
-     [:textarea  (merge (:command-window cfg)
+     [:textarea  (merge (:command-window app-cfg)
                         {:value (:command-buffer @mui-state)
                                         ;:on-key-press (fn [event] (println (.-key event)))
-                         :on-key-press keystroke-handler})]
+                         ;:on-key-press keystroke-handler
+                         :on-key-down keystroke-handler})]
 
      [:div ;output frame
       ]
