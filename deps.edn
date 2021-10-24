@@ -5,7 +5,9 @@
  {org.clojure/clojurescript {:mvn/version "1.10.597"}
   com.bhauman/figwheel-main {:mvn/version "0.2.12"}
   reagent/reagent           {:mvn/version "0.10.0"}
-  com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
+  com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+  gpropf/mui {:git/url "git@github.com:gpropf/mui.git" :sha "ad53c4651b77716919ea5dd6e47a79ac58993df6"}
+  }
 
 
  :aliases

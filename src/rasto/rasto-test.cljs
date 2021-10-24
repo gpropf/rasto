@@ -46,7 +46,7 @@
                                              :rows "4"
                                              :cols "60"
                                              :class ""
-                                             :default-value "TEST"
+                                             :default-value "MUI"
                                              }
                             :app-cmds {}}})
 

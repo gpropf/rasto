@@ -5,7 +5,8 @@
    [reagent.core :as reagent :refer [atom]]
    [cljs.pprint :as pp :refer [pprint]]
    [rasto.util :as rut]
-   [rasto.mui :as rm]))
+   #_[rasto.mui :as rm]
+   [mui.core :as mui]))
 
 
 (defrecord Raster [dimensions ;width and height in abstract units as a 2-vec: [w h].
@@ -127,7 +128,7 @@
     [:div
     ; (println "rasto/core - CMDS1: ")
     ; (pprint app-cfg)
-     [rm/mui-gui (merge (:mui-cfg app-cfg)  rasto-cfg)]
+     [mui/mui-gui (merge (:mui-cfg app-cfg)  rasto-cfg)]
      [:svg {:id (rut/key-to-string (:id raster))
             :style        {:margin-left "0.5em" :border "medium solid green"}
             :stroke       "darkgrey"
