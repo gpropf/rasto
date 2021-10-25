@@ -23,7 +23,8 @@
 
 (def rasto-cfg {:app-cmds
                 {"b"
-                 {:args
+                 {:fn (fn [arg-map] (println "Creating new brush, width: " (:w arg-map) ", height: " (:h arg-map)) (mui/append-to-field "command-window" "\nFOO!")  )
+                  :args
                   {:w
                    {:prompt "Width of new brush?"}
                    :h

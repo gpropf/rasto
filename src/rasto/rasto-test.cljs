@@ -46,7 +46,7 @@
                                              :rows "4"
                                              :cols "60"
                                              :class ""
-                                             :default-value "MUI"
+                                             :default-value "MUI2"
                                              }
                             :app-cmds {}}})
 
