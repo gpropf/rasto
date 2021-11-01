@@ -43,10 +43,10 @@
                                                      :margin-bottom "5px"
                                                      :float "right"}
                                              :id "command-window"
-                                             :rows "4"
+                                             :rows "8"
                                              :cols "60"
                                              :class ""
-                                             :default-value "MUI2"
+                                             :default-value ":] "
                                              }
                             :app-cmds {}}})
 
@@ -60,7 +60,7 @@
                  (rut/position-relative-to-upper-left
                   mev (rut/key-to-string (:id raster))) raster)
           ]
-      (println "Mousing over " (:id raster) ":" [x y])
+      #_(println "Mousing over " (:id raster) ":" [x y])
       (swap! raster-atom assoc :last-mouse-location [x y]))))
 
 

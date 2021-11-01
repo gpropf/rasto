@@ -23,12 +23,18 @@
 
 (def rasto-cfg {:app-cmds
                 {"b"
-                 {:fn (fn [arg-map] (println "Creating new brush, width: " (:w arg-map) ", height: " (:h arg-map)))
+                 {:fn (fn [arg-map]
+                        (println "ARG-MAP in applied fn: " arg-map)
+                        (println "Creating new brush, width: "
+                                 (get-in arg-map [:w :val])
+                                 ", height: " (get-in arg-map [:h :val])))
                   :args
                   {:w
-                   {:prompt "Width of new brush?"}
+                   {:prompt "Width of new brush?"
+                    :type :int}
                    :h
-                   {:prompt "Height of new brush?"}}}}})
+                   {:prompt "Height of new brush?"
+                    :type :int}}}}})
 
 
 
@@ -82,6 +88,7 @@
    4. Return the results as a vector of 3-vectors [x y cell-state]."
   [raster]
   (vec (map #(-> % vec)
+
             (apply concat (map-indexed
                            (fn [col e]
                              (let [value-mapping
