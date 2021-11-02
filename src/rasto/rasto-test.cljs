@@ -46,7 +46,7 @@
                                              :rows "8"
                                              :cols "60"
                                              :class ""
-                                             :default-value ":] "
+                                             ;:default-value ""
                                              }
                             :app-cmds {}}})
 
