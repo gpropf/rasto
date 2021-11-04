@@ -15,42 +15,6 @@
 
 (def default-cell-state 100)
 
-
-(defonce
-  rasto-test-cfg {; :off-cell-color "#F5F5DC"
-                  :off-cell-color "#FFFFFF"
-                  ;; :on-cell-color "#1e90ff"
-                  :on-cell-color "#555555"
-                  :cell-color-map {0 "#F5F5DC"
-                                   1 "#00FF00"
-                                   2 "#00AA00"
-                                   3 "#FF00FF"
-                                   4 "#AA00AA"
-                                   5 "#00AAFF"
-                                   6 "#9090AA"
-                                   7 "#888888"}
-                  :default-da-screen-width 600
-                  :default-da-screen-height 400
-                  :default-rule-frame-screen-width 150
-                  :default-rule-frame-screen-height 150
-                  :default-da-width 60
-                  :default-da-height 40
-                  :default-download-filename "rules.edn"
-                  :default-rf-dimensions "5,5"
-                  :default-starting-rule-frame-index 1
-                  :default-grid-dimensions "60,40"
-                  :mui-cfg {:command-window {:style {:height "auto"
-                                                     :margin-bottom "5px"
-                                                     :float "right"}
-                                             :id "command-window"
-                                             :rows "8"
-                                             :cols "60"
-                                             :class ""
-                                             ;:default-value ""
-                                             }
-                            :app-cmds {}}})
-
-
 (defn hover-fn
   "This the function we feed to the Raster for hover events."
   [raster-atom]
@@ -60,7 +24,7 @@
                  (rut/position-relative-to-upper-left
                   mev (rut/key-to-string (:id raster))) raster)
           ]
-      #_(println "Mousing over " (:id raster) ":" [x y])
+      (println "Mousing over " (:id raster) ":" [x y])
       (swap! raster-atom assoc :last-mouse-location [x y]))))
 
 
@@ -96,10 +60,50 @@
   (> (cell-state-to-color-index-fn cell-state) 0) )
 
 
+
+
+
 (defonce raster-atom (atom (make-raster
-                        [60 40] [800 600] default-cell-state :rst1
-                        hover-fn left-click-fn right-click-fn
-                        cell-state-to-color-index-fn cell-is-visible-fn)))
+                            [60 40] [800 600] default-cell-state :rst1
+                            hover-fn left-click-fn right-click-fn
+                            cell-state-to-color-index-fn cell-is-visible-fn)))
+
+(defonce
+  rasto-test-cfg {; :off-cell-color "#F5F5DC"
+                  :off-cell-color "#FFFFFF"
+                  ;; :on-cell-color "#1e90ff"
+                  :on-cell-color "#555555"
+                  :cell-color-map {0 "#F5F5DC"
+                                   1 "#00FF00"
+                                   2 "#00AA00"
+                                   3 "#FF00FF"
+                                   4 "#AA00AA"
+                                   5 "#00AAFF"
+                                   6 "#9090AA"
+                                   7 "#888888"}
+                  :default-da-screen-width 600
+                  :default-da-screen-height 400
+                  :default-rule-frame-screen-width 150
+                  :default-rule-frame-screen-height 150
+                  :default-da-width 60
+                  :default-da-height 40
+                  :default-download-filename "rules.edn"
+                  :default-rf-dimensions "5,5"
+                  :default-starting-rule-frame-index 1
+                  :default-grid-dimensions "60,40"
+                  :mui-cfg {:command-window {:style {:height "auto"
+                                                     :margin-bottom "5px"
+                                                     :float "right"}
+                                             :id "command-window"
+                                             :rows "8"
+                                             :cols "60"
+                                             :class ""
+                                             ;:default-value ""
+                                             }
+                            :app-cmds {}
+                            :implicits {:parent-raster-atom raster-atom}}})
+
+
 
 
 (defn app

@@ -6,7 +6,8 @@
    [cljs.pprint :as pp :refer [pprint]]
    [rasto.util :as rut]
    #_[rasto.mui :as rm]
-   [mui.core :as mui]))
+   [mui.core :as mui]
+   ))
 
 
 (defrecord Raster [dimensions ;width and height in abstract units as a 2-vec: [w h].
@@ -18,25 +19,9 @@
                    right-click-fn ;run for right click.
                    cell-state-to-color-index-fn ;translate a cell's state into a color index fn.
                    cell-is-visible-fn ;decide whether the cell should be visible or not.
+                   brushes ;List of small rasters used as brushes to draw on the larger one.
+                   is-brush? ;boolean: true if this is a brush of another raster.
                    ])
-
-
-(def rasto-cfg {:app-cmds
-                {"b"
-                 {:fn (fn [arg-map]
-                        (println "ARG-MAP in applied fn: " arg-map)
-                        (println "Creating new brush, width: "
-                                 (get-in arg-map [:w :val])
-                                 ", height: " (get-in arg-map [:h :val])))
-                  :args
-                  {:w
-                   {:prompt "Width of new brush?"
-                    :type :int}
-                   :h
-                   {:prompt "Height of new brush?"
-                    :type :int}}}}})
-
-
 
 (defn raw-data-array
   "Returns a raw rule-array cleared to provided value or 0."
@@ -49,15 +34,71 @@
                    (vec (take h (repeat cell-state)))))))))
 
 
-
 (defn make-raster
   "Constructor function for the Raster."
-  [[w h] [sw sh] default-value id
-   hover-fn left-click-fn right-click-fn
-   cell-state-to-color-index-fn cell-is-visible-fn]
-  (->Raster [w h] [sw sh] (raw-data-array [w h] default-value) id
-            hover-fn left-click-fn right-click-fn
-            cell-state-to-color-index-fn cell-is-visible-fn) )
+  ([[w h] [sw sh] default-value id
+    hover-fn left-click-fn right-click-fn
+    cell-state-to-color-index-fn cell-is-visible-fn]
+   (make-raster [w h] [sw sh] default-value id
+                hover-fn left-click-fn right-click-fn
+                cell-state-to-color-index-fn cell-is-visible-fn [] false))
+  ([[w h] [sw sh] default-value id
+    hover-fn left-click-fn right-click-fn
+    cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush?]
+   (->Raster [w h] [sw sh] (raw-data-array [w h] default-value) id
+             hover-fn left-click-fn right-click-fn
+             cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush?)))
+
+(def tickets (atom 0))
+
+(defn take-ticket! []
+  (let [ticket-num @tickets]
+    (println "Ticket #" ticket-num " taken.")
+    (swap! tickets inc)))
+
+
+
+(defn new-brush [raster-atom [w h] [sw sh]]
+  (let [raster @raster-atom
+        brush (make-raster [w h] [sw sh] 0
+                           :FIXME (:hover-fn @raster-atom)
+                           (:left-click-fn @raster-atom)
+                           (:right-click-fn @raster-atom)
+                           (:cell-state-to-color-index-fn raster)
+                           (:cell-is-visible-fn raster) [] true)]
+    (atom brush)))
+
+
+(def rasto-cfg {:app-cmds
+                {"b"
+                 {:fn (fn [arg-map]
+                        (let [w (get-in arg-map [:w :val])
+                              h (get-in arg-map [:h :val])
+                              parent-raster-atom
+                              (get-in @mui/mui-state [:implicits :parent-raster-atom])
+                              brush (new-brush parent-raster-atom
+                                               [w h]
+                                               [100 100])]
+                          (swap! parent-raster-atom update :brushes conj brush)
+                          (println "NEw BRUSH: " brush)
+                          (println "ARG-MAP in applied fn: " arg-map)
+                          (println "Creating new brush, width: " w
+                                   ", height: " h)))
+                  :args
+                  {:w
+                   {:prompt "Width of new brush?"
+                    :type :int}
+                   :h
+                   {:prompt "Height of new brush?"
+                    :type :int}}}}})
+
+
+
+
+
+
+
+
 
 
 (defn relative-xy-to-grid-xy
@@ -80,12 +121,17 @@
 
 
 (defn list-cells
-  "In English:
+  "Pseudo-code:
+
    1. Create a row-col indexed map of the cell values in :raw-data
-   2. Filter that map based on whether the :cell-is-visible-fn return true for that cell
+
+   2. Filter that map based on whether the :cell-is-visible-fn returns
+      true for that cell
+
    3. Use apply/concat to flatten the results as in the example in
       https://clojuredocs.org/clojure.core/concat
-   4. Return the results as a vector of 3-vectors [x y cell-state]."
+
+  4. Return the results as a vector of 3-vectors [x y cell-state]."
   [raster]
   (vec (map #(-> % vec)
 
@@ -111,10 +157,8 @@
            (fn [x] (str "M " x " 0 L " x " " h))
            (range 0 w)))))
 
-(defn new-brush [raster-atom ]
 
 
-  )
 
 (defn raster-view
   "Provides a visual representation of the Raster and basic
@@ -132,11 +176,14 @@
         [w h] (:dimensions raster)
         [sw sh] (:screen-dimensions raster)
         cells-to-show (list-cells raster)
-        grid-path-key  (rut/genkey "grid-path-key_")]
-    [:div
+        grid-path-key  (rut/genkey "grid-path-key_")
+        brushes (:brushes raster)
+        is-brush? (:is-brush? raster)]
+    [:div {:style {:float "left"}}
     ; (println "rasto/core - CMDS1: ")
     ; (pprint app-cfg)
-     [mui/mui-gui (merge (:mui-cfg app-cfg)  rasto-cfg)]
+     (when (false? is-brush?)
+       [mui/mui-gui (merge (:mui-cfg app-cfg) rasto-cfg)])
      [:svg {:id (rut/key-to-string (:id raster))
             :style        {:margin-left "0.5em" :border "medium solid green"}
             :stroke       "darkgrey"
@@ -171,4 +218,9 @@
                        :height 1
                        :fill   ((:cell-color-map app-cfg)
                                 ((:cell-state-to-color-index-fn raster) cell-state))}]))
-           cells-to-show)]]))
+           cells-to-show)]
+
+     (when (not-empty brushes)
+       (map (fn [brush-raster-atom]
+              ^{:key (rut/genkey "brush")} [raster-view brush-raster-atom app-cfg])
+            brushes))]))
