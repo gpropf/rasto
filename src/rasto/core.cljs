@@ -53,7 +53,7 @@
 
 (defn take-ticket! []
   (let [ticket-num @tickets]
-    (println "Ticket #" ticket-num " taken.")
+    #_(println "Ticket #" ticket-num " taken.")
     (swap! tickets inc)))
 
 
@@ -61,7 +61,7 @@
 (defn new-brush [raster-atom [w h] [sw sh]]
   (let [raster @raster-atom
         brush (make-raster [w h] [sw sh] 0
-                           :FIXME (:hover-fn @raster-atom)
+                           (keyword (str (name (:id raster)) "brush" (take-ticket!))) (:hover-fn @raster-atom)
                            (:left-click-fn @raster-atom)
                            (:right-click-fn @raster-atom)
                            (:cell-state-to-color-index-fn raster)
