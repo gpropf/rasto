@@ -34,7 +34,7 @@
   (fn [mev]
     (let [raster @raster-atom
           last-mouse-location (:last-mouse-location raster)]
-      (reset! raster-atom (rcore/set-cell raster last-mouse-location 101))
+      (reset! raster-atom (rcore/set-cell raster last-mouse-location (+ 100 (:color raster))))
       (println "Click at: " last-mouse-location))))
 
 

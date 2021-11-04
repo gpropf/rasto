@@ -21,6 +21,7 @@
                    cell-is-visible-fn ;decide whether the cell should be visible or not.
                    brushes ;List of small rasters used as brushes to draw on the larger one.
                    is-brush? ;boolean: true if this is a brush of another raster.
+                   color ;The current color to use for drawing cells.
                    ])
 
 (defn raw-data-array
@@ -47,7 +48,7 @@
     cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush?]
    (->Raster [w h] [sw sh] (raw-data-array [w h] default-value) id
              hover-fn left-click-fn right-click-fn
-             cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush?)))
+             cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? 1)))
 
 (def tickets (atom 0))
 
@@ -56,12 +57,19 @@
     #_(println "Ticket #" ticket-num " taken.")
     (swap! tickets inc)))
 
-
+(defn set-color! [raster-atom c]
+  (let [raster @raster-atom]
+    (swap! raster-atom assoc :color c)
+    (mapv (fn [brush]
+           (set-color! brush c)
+           ) (:brushes raster))))
 
 (defn new-brush [raster-atom [w h] [sw sh]]
   (let [raster @raster-atom
         brush (make-raster [w h] [sw sh] 0
-                           (keyword (str (name (:id raster)) "brush" (take-ticket!))) (:hover-fn @raster-atom)
+                           (keyword
+                            (str (name (:id raster)) "-brush" (take-ticket!)))
+                           (:hover-fn @raster-atom)
                            (:left-click-fn @raster-atom)
                            (:right-click-fn @raster-atom)
                            (:cell-state-to-color-index-fn raster)
@@ -70,7 +78,7 @@
 
 
 (def rasto-cfg {:app-cmds
-                {"b"
+                {66 ;'b'
                  {:fn (fn [arg-map]
                         (let [w (get-in arg-map [:w :val])
                               h (get-in arg-map [:h :val])
@@ -90,15 +98,21 @@
                     :type :int}
                    :h
                    {:prompt "Height of new brush?"
+                    :type :int}}}
+                 67 ;'c'
+                 {:fn (fn [arg-map]
+                        (let [c (get-in arg-map [:c :val])
+                              parent-raster-atom
+                              (get-in @mui/mui-state [:implicits :parent-raster-atom])]
+
+                          (set-color! parent-raster-atom c)
+                          #_(swap! parent-raster-atom assoc :color c)
+                          (println "NEW COLOR: " c)
+                          ))
+                  :args
+                  {:c
+                   {:prompt "New color value (1-9)?"
                     :type :int}}}}})
-
-
-
-
-
-
-
-
 
 
 (defn relative-xy-to-grid-xy
@@ -156,8 +170,6 @@
           (map
            (fn [x] (str "M " x " 0 L " x " " h))
            (range 0 w)))))
-
-
 
 
 (defn raster-view
