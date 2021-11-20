@@ -98,7 +98,8 @@
                     :type :int}
                    :h
                    {:prompt "Height of new brush?"
-                    :type :int}}}
+                    :type :int}}
+                  :help {:msg "b : Make new brush [interactive]."}}
                  :c
                  {:fn (fn [arg-map]
                         (let [c (get-in arg-map [:c :val])
@@ -107,12 +108,12 @@
 
                           (set-color! parent-raster-atom c)
                           #_(swap! parent-raster-atom assoc :color c)
-                          (println "NEW COLOR: " c)
-                          ))
+                          (println "NEW COLOR: " c)))
                   :args
                   {:c
                    {:prompt "New color value (1-9)?"
-                    :type :int}}}}})
+                    :type :int}}
+                  :help {:msg "c : Change working color."}}}})
 
 
 (defn relative-xy-to-grid-xy
