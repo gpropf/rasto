@@ -78,7 +78,7 @@
 
 
 (def rasto-cfg {:app-cmds
-                {66 ;'b'
+                {:b
                  {:fn (fn [arg-map]
                         (let [w (get-in arg-map [:w :val])
                               h (get-in arg-map [:h :val])
@@ -99,7 +99,7 @@
                    :h
                    {:prompt "Height of new brush?"
                     :type :int}}}
-                 67 ;'c'
+                 :c
                  {:fn (fn [arg-map]
                         (let [c (get-in arg-map [:c :val])
                               parent-raster-atom
