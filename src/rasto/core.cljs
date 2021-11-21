@@ -42,13 +42,13 @@
     cell-state-to-color-index-fn cell-is-visible-fn]
    (make-raster [w h] [sw sh] default-value id
                 hover-fn left-click-fn right-click-fn
-                cell-state-to-color-index-fn cell-is-visible-fn [] false))
+                cell-state-to-color-index-fn cell-is-visible-fn [] false 1))
   ([[w h] [sw sh] default-value id
     hover-fn left-click-fn right-click-fn
-    cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush?]
+    cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? initial-color]
    (->Raster [w h] [sw sh] (raw-data-array [w h] default-value) id
              hover-fn left-click-fn right-click-fn
-             cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? 1)))
+             cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? initial-color)))
 
 (def tickets (atom 0))
 
@@ -73,7 +73,7 @@
                            (:left-click-fn @raster-atom)
                            (:right-click-fn @raster-atom)
                            (:cell-state-to-color-index-fn raster)
-                           (:cell-is-visible-fn raster) [] true)]
+                           (:cell-is-visible-fn raster) [] true (:color raster))]
     (atom brush)))
 
 

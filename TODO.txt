@@ -7,7 +7,8 @@ Bug Fixes
 
     Rasto
 
-1. Color should change in all existing brushes when changed in main raster.
+1. DONE: Color for new brushes should be set to the current color of
+the parent raster.
 
 
 New Features
