@@ -99,7 +99,7 @@
                    :h
                    {:prompt "Height of new brush?"
                     :type :int}}
-                  :help {:msg "b : Make new brush [interactive]."}}
+                  :help {:msg "b\t: Make new brush."}}
                  :c
                  {:fn (fn [arg-map]
                         (let [c (get-in arg-map [:c :val])
@@ -113,7 +113,7 @@
                   {:c
                    {:prompt "New color value (1-9)?"
                     :type :int}}
-                  :help {:msg "c : Change working color."}}}})
+                  :help {:msg "c\t: Change working color."}}}})
 
 
 (defn relative-xy-to-grid-xy

@@ -12,6 +12,14 @@ Bug Fixes
 
 New Features
 
+    Rasto
+
+* Ability to click and hold button down to draw freehand line.
+
+
+
+
+
     Mui
 
 1. DONE: Error recovery on bad data entry. Questions should be re-asked if
@@ -22,9 +30,12 @@ user enters malformed text.
 * Read/Write objects to local file.
 
 
+
+
+
 Design Level Items
 
-       Mui
+     Mui
 
 * Selection can be by three means:
   1. Answer the query about which thing to select.
