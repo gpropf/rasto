@@ -96,7 +96,8 @@
            (swap! parent-raster-atom update :brushes conj brush)
            (println "NEw BRUSH: " brush)
            (println "ARG-MAP in applied fn: " arg-map)
-           (println "Creating new brush, width: " w ", height: " h)))
+           (println "Creating new brush, width: " w ", height: " h)
+           (swap! mc/mui-state assoc :return-to-normal true)))
    :args
    {:w
     {:prompt "Width of new brush?"
