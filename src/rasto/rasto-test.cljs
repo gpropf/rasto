@@ -4,6 +4,7 @@
   itself. We call the function that creates the GUI from here and this
   kicks everything else off."
   (:require
+   [mui.core :as mc]
    [rasto.core :as rcore :refer [make-raster raster-view]]
    [reagent.dom :as rd]
    [clojure.string :as str]
@@ -102,6 +103,7 @@
                                              }
                             :app-cmds {}
                             :implicits {:parent-raster-atom raster-atom}}})
+
 
 
 

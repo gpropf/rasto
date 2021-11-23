@@ -6,7 +6,7 @@
    [cljs.pprint :as pp :refer [pprint]]
    [rasto.util :as rut]
    #_[rasto.mui :as rm]
-   [mui.core :as mui]
+   [mui.core :as mc]
    ))
 
 
@@ -52,6 +52,11 @@
 
 (def tickets (atom 0))
 
+
+
+
+
+
 (defn take-ticket! []
   (let [ticket-num @tickets]
     #_(println "Ticket #" ticket-num " taken.")
@@ -77,13 +82,40 @@
     (atom brush)))
 
 
+(mc/register-application-defined-type
+ "Brush"
+ {:new
+  {:fn (fn [arg-map]
+         (let [w (get-in arg-map [:w :val])
+               h (get-in arg-map [:h :val])
+               parent-raster-atom
+               (get-in @mc/mui-state [:implicits :parent-raster-atom])
+               brush (new-brush parent-raster-atom
+                                [w h]
+                                [100 100])]
+           (swap! parent-raster-atom update :brushes conj brush)
+           (println "NEw BRUSH: " brush)
+           (println "ARG-MAP in applied fn: " arg-map)
+           (println "Creating new brush, width: " w ", height: " h)))
+   :args
+   {:w
+    {:prompt "Width of new brush?"
+     :type :int}
+    :h
+    {:prompt "Height of new brush?"
+     :type :int}}
+   :help {:msg "b\t: Make new brush."}}
+  :delete {}})
+
+
+
 (def rasto-cfg {:app-cmds
                 {:b
                  {:fn (fn [arg-map]
                         (let [w (get-in arg-map [:w :val])
                               h (get-in arg-map [:h :val])
                               parent-raster-atom
-                              (get-in @mui/mui-state [:implicits :parent-raster-atom])
+                              (get-in @mc/mui-state [:implicits :parent-raster-atom])
                               brush (new-brush parent-raster-atom
                                                [w h]
                                                [100 100])]
@@ -104,7 +136,7 @@
                  {:fn (fn [arg-map]
                         (let [c (get-in arg-map [:c :val])
                               parent-raster-atom
-                              (get-in @mui/mui-state [:implicits :parent-raster-atom])]
+                              (get-in @mc/mui-state [:implicits :parent-raster-atom])]
 
                           (set-color! parent-raster-atom c)
                           #_(swap! parent-raster-atom assoc :color c)
@@ -196,7 +228,7 @@
     ; (println "rasto/core - CMDS1: ")
     ; (pprint app-cfg)
      (when (false? is-brush?)
-       [mui/mui-gui (merge (:mui-cfg app-cfg) rasto-cfg)])
+       [mc/mui-gui (merge (:mui-cfg app-cfg) rasto-cfg)])
      [:svg {:id (rut/key-to-string (:id raster))
             :style        {:margin-left "0.5em" :border "medium solid green"}
             :stroke       "darkgrey"
