@@ -53,10 +53,6 @@
 (def tickets (atom 0))
 
 
-
-
-
-
 (defn take-ticket! []
   (let [ticket-num @tickets]
     #_(println "Ticket #" ticket-num " taken.")
@@ -94,6 +90,7 @@
                                 [w h]
                                 [100 100])]
            (swap! parent-raster-atom update :brushes conj brush)
+           (mc/add-object-to-object-store brush :Brush (:id brush) :rst1-brush1)
            (println "NEw BRUSH: " brush)
            (println "ARG-MAP in applied fn: " arg-map)
            (println "Creating new brush, width: " w ", height: " h)
@@ -182,7 +179,6 @@
   4. Return the results as a vector of 3-vectors [x y cell-state]."
   [raster]
   (vec (map #(-> % vec)
-
             (apply concat (map-indexed
                            (fn [col e]
                              (let [value-mapping
