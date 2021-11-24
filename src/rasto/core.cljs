@@ -90,7 +90,7 @@
                                 [w h]
                                 [100 100])]
            (swap! parent-raster-atom update :brushes conj brush)
-           (mc/add-object-to-object-store brush :Brush (:id @brush) (:id @parent-raster-atom))
+           (mc/add-object-to-object-store brush "Brush" (:id @brush) (:id @parent-raster-atom))
            (println "NEw BRUSH: " brush)
            (println "ARG-MAP in applied fn: " arg-map)
            (println "Creating new brush, width: " w ", height: " h)
