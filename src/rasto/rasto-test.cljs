@@ -69,6 +69,24 @@
                             hover-fn left-click-fn right-click-fn
                             cell-state-to-color-index-fn cell-is-visible-fn)))
 
+
+
+(mc/register-application-defined-type
+ "Raster"
+ {:new
+  {:fn (fn [arg-map]
+         (let [w (get-in arg-map [:w :val])
+               h (get-in arg-map [:h :val])]
+           (mc/add-object-to-object-store raster-atom "Raster" :rst1 nil)
+           (swap! mc/mui-state assoc :return-to-normal true)))
+   :args {}}
+  :delete {}})
+
+
+(mc/add-object-to-object-store raster-atom "Raster" :rst1 nil)
+
+
+
 (defonce
   rasto-test-cfg {; :off-cell-color "#F5F5DC"
                   :off-cell-color "#FFFFFF"
