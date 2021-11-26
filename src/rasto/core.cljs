@@ -238,6 +238,8 @@
             :on-context-menu ((:right-click-fn raster) raster-atom)
             :on-click ((:left-click-fn raster) raster-atom)
             :on-mouse-move ((:hover-fn raster) raster-atom)
+            :on-mouse-down (if (not (:is-brush? raster)) ((:mouse-down-fn raster) raster-atom) nil)
+            :on-mouse-up  (if (not (:is-brush? raster)) ((:mouse-up-fn raster) raster-atom) nil)
             :preserveAspectRatio "none"}
       [:rect {:key    :bkgd-rect
               :id     :bkgd-rect
@@ -249,12 +251,23 @@
               :d            (raster-view-grid raster)
               :stroke       "lightgrey"
               :stroke-width 0.02}]
+      (let [[mx my] (:last-mouse-location raster)
+            mouse-cell-key (rut/key-to-string "mouse-cell" [mx my])]
+        [:rect {:id     mouse-cell-key
+                :x      mx
+                :key    mouse-cell-key
+                :y      my
+                :width  1
+                :height 1
+                :fill   "none"
+                :stroke       "green"
+                :stroke-width 0.03}])
       (map (fn [[x y cell-state]]
              (let [cell-key (rut/key-to-string "cell" [x y])]
                ^{:key (rut/genkey "cell")}
-               [:rect {:key    cell-key
-                       :id     cell-key
+               [:rect {:id     cell-key
                        :x      x
+                       :key    cell-key
                        :y      y
                        :width  1
                        :height 1

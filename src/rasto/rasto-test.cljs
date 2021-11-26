@@ -24,8 +24,9 @@
           [x y] (rcore/relative-xy-to-grid-xy
                  (rut/position-relative-to-upper-left
                   mev (rut/key-to-string (:id raster))) raster)
-          ]
-      (println "Mousing over " (:id raster) ":" [x y])
+          color (:color raster)]
+      (println "Mousing over " (:id raster) ":" [x y] "with color " color)
+      (when (:left-mouse-down raster) (reset! raster-atom (rcore/set-cell raster [x y] (+ 100 color))))
       (swap! raster-atom assoc :last-mouse-location [x y]))))
 
 
@@ -44,6 +45,22 @@
   [raster-atom]
   (fn [mev] (println "Right click placeholder fn triggered for
   id " (:id @raster-atom) " at " (:last-mouse-location @raster-atom))))
+
+
+(defn mouse-down-fn [raster-atom]
+
+  (fn [mev]
+    (println "MOUSE DOWN!!!!!???")
+    (swap! raster-atom assoc :left-mouse-down true)))
+
+
+(defn mouse-up-fn [raster-atom]
+
+  (fn [mev]
+    (println "MOUSE UP!!!!!???")
+    (swap! raster-atom assoc :left-mouse-down false)))
+
+
 
 
 (defn cell-state-to-color-index-fn
@@ -69,7 +86,8 @@
                             hover-fn left-click-fn right-click-fn
                             cell-state-to-color-index-fn cell-is-visible-fn)))
 
-
+(swap! raster-atom assoc :mouse-down-fn mouse-down-fn)
+(swap! raster-atom assoc :mouse-up-fn mouse-up-fn)
 
 (mc/register-application-defined-type
  "Raster"
