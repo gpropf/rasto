@@ -14,3 +14,11 @@ loaded above where the compiled JS for this is loaded. I know about
 things Jayq but just didn't feel like getting involved in externs and
 other stuff like that. My use of jQuery is pretty basic, limited to
 things like getting web page elements.
+
+## Building
+
+The project is set up to be built with the Clojure CLI tools rather
+than Leiningen or Boot. The following will build the project and start
+a figwheel REPL.  `clj -M:dev`. You can make a production build with
+`clj -M:prod`. This simply builds the JS target code. It does not
+start a REPL or Figwheel.

@@ -15,10 +15,7 @@ New Features
 
     Rasto
 
-* Ability to click and hold button down to draw freehand line.
-
-
-
+* Done: Ability to click and hold button down to draw freehand line.
 
 
     Mui
