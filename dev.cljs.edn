@@ -1,6 +1,6 @@
 ^{:watch-dirs ["src" "../mui/src"]
   :css-dirs   ["resources"]}
 ;;  :open-url "http://localhost/mu"}
-{:main rasto.rasto-test
+{:main rasto.example
  :source-map true
  :optimizations :none}

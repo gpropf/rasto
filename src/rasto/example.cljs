@@ -1,4 +1,4 @@
-(ns rasto.rasto-test
+(ns rasto.example
   "This module basically exists only as an entry point for the
   code. It's essentially 'int main ()' and shouldn't really do much
   itself. We call the function that creates the GUI from here and this

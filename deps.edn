@@ -12,4 +12,4 @@
 
  :aliases
  {:dev {:main-opts ["-m" "figwheel.main" "--build" "dev" "--repl"]}
-  :prod {:main-opts ["-m" "cljs.main" "--optimizations" "advanced" "-c" "rasto-test.main"]}}}
+  :prod {:main-opts ["-m" "cljs.main" "--optimizations" "advanced" "-c" "example.main"]}}}
