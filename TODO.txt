@@ -25,7 +25,8 @@ user enters malformed text.
 
 2. Selection by any method should cause selection query to move on.
 
-* Read/Write objects to local file.
+* Read/Write objects to local file along with a load/save pair of
+  commands.
 
 
 
