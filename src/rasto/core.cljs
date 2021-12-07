@@ -107,7 +107,7 @@
 
 
 
-(def rasto-cfg {:app-cmds
+(def rasto-cmd-map {:app-cmds
                 {:b
                  {:fn (fn [arg-map]
                         (let [w (get-in arg-map [:w :val])
@@ -213,7 +213,7 @@
   valued functions with no room for arbitrary extra args like our
   raster-atom. See the rasto-test code for examples of how these
   work."
-  [raster-atom app-cfg]
+  [raster-atom app-cfg app-cmd-map]
   (let [raster @raster-atom
         [w h] (:dimensions raster)
         [sw sh] (:screen-dimensions raster)
@@ -225,7 +225,7 @@
     ; (println "rasto/core - CMDS1: ")
     ; (pprint app-cfg)
      (when (false? is-brush?)
-       [mc/mui-gui (merge (:mui-cfg app-cfg) rasto-cfg)])
+       [mc/mui-gui2 (:mui-cfg app-cfg) (merge rasto-cmd-map app-cmd-map)])
      [:svg {:id (rut/key-to-string (:id raster))
             :style        {:margin-left "0.5em" :border "medium solid green"}
             :stroke       "darkgrey"

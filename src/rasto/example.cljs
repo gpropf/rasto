@@ -106,7 +106,7 @@
 
 
 (defonce
-  rasto-test-cfg {; :off-cell-color "#F5F5DC"
+  rasto-example-cfg {; :off-cell-color "#F5F5DC"
                   :off-cell-color "#FFFFFF"
                   ;; :on-cell-color "#1e90ff"
                   :on-cell-color "#555555"
@@ -149,7 +149,7 @@
   from here."
   []
   [:div {}
-   [raster-view raster-atom rasto-test-cfg]])
+   [raster-view raster-atom rasto-example-cfg {}]])
 
 
 (defn render-app
