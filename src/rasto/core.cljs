@@ -225,7 +225,7 @@
     ; (println "rasto/core - CMDS1: ")
     ; (pprint app-cfg)
      (when (false? is-brush?)
-       [mc/mui-gui2 (:mui-cfg app-cfg) (merge rasto-cmd-map app-cmd-map)])
+       [mc/mui-gui2 (:mui-cfg app-cfg) (merge rasto-cmd-map app-cmd-map) {:c [67 false false false false]}])
      [:svg {:id (rut/key-to-string (:id raster))
             :style        {:margin-left "0.5em" :border "medium solid green"}
             :stroke       "darkgrey"
