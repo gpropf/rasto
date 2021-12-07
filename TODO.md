@@ -8,24 +8,23 @@ design document.
 
 ###Rasto
 
-1. **DONE**: Color for new brushes should be set to the current color of
-the parent raster.
+
 
 
 ##New Features
 
 ###Rasto
 
-* Done: Ability to click and hold button down to draw freehand line.
+* Replay history to recreate objects.
+* Command for adding cells.
 
 ###Mui
 
-1. DONE: Error recovery on bad data entry.
-Questions should be re-asked if user enters malformed text.
-2. Selection by any method (i.e. mouse over/click, select
-command, etc.) should cause selection query to move on.
-3. Read/Write objects to local file along with a
+* Selection by any method (i.e. mouse over/click, select
+command, etc.) should cause selection query to move on. 
+* Read/Write objects to local file along with a
 load/save pair of commands.
+  * Needs work. Need to develop file format and load/save funcs.
 
 ##Design Level Items
 
