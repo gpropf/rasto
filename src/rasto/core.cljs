@@ -256,7 +256,11 @@
       ; (pprint app-cfg)
       ; {:c [67 false false false false]}
       (when (false? is-brush?)
-        [mc/mui-gui2 (:mui-cfg app-cfg) rasto-cmd-maps])
+        [mc/mui-gui2 (:mui-cfg app-cfg) (merge rasto-cmd-maps app-cmd-map)])
+      (when (not-empty brushes)
+        [:div {:id "brushes"} (map (fn [brush-raster-atom]
+                                     ^{:key (rut/genkey "brush")} [raster-view brush-raster-atom app-cfg])
+                                   brushes)])
       [:svg {:id                  (rut/key-to-string (:id raster))
              :style               {:margin-left "0.5em" :border "medium solid green"}
              :stroke              "darkgrey"
@@ -306,7 +310,4 @@
                                  ((:cell-state-to-color-index-fn raster) cell-state))}]))
             cells-to-show)]
 
-      (when (not-empty brushes)
-        (map (fn [brush-raster-atom]
-               ^{:key (rut/genkey "brush")} [raster-view brush-raster-atom app-cfg])
-             brushes))]))
+      ]))
