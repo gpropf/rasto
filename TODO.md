@@ -19,6 +19,7 @@ design document.
 * Command for adding cells.
 * Integrate the inverse mapping function into the cmd-maps.
 * Add checks to make sure all commands have a keystroke mapping.
+* Draw with brushes.
 
 ###Mui
 
