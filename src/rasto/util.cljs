@@ -40,7 +40,7 @@
 
 (defn key-to-string
   "This function takes a key which may be one of several types of thing or nil
-   along with optional [x y] coords and makes a nicely formatted string out of
+   along with optional [x y] co-ords and makes a nicely formatted string out of
    it suitable for use as an id for a RF cell."
   ([k]
    (cond

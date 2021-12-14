@@ -72,8 +72,8 @@
 
 
 (defn cell-is-visible-fn
-  "This is a simple example of how we decide if a cell is visible. I
-  this case we just return true if the color index is > 0."
+  "This is a simple example of how we decide if a cell is visible. In this
+  case we just return true if the color index is > 0."
   [cell-state]
   (> (cell-state-to-color-index-fn cell-state) 0) )
 
