@@ -23,11 +23,17 @@ design document.
 
 ###Mui
 
-* Selection by any method (i.e. mouse over/click, select
-command, etc.) should cause selection query to move on. 
-* Read/Write objects to local file along with a
-load/save pair of commands.
-  * Needs work. Need to develop file format and load/save funcs.
+ * Selection by any method (i.e. mouse over/click, select
+   command, etc.) should cause selection query to move on. 
+ * Read/Write objects to local file along with a
+   load/save pair of commands.
+ * Function to look at arglists of metadata
+   and create a command map with prompts for each arg.
+ * Need a way to edit the prompts and types of args for
+   functions.
+ * Need to be able to save/load functions and types for
+   each app.
+
 
 ##Design Level Items
 
