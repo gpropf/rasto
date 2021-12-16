@@ -50,7 +50,12 @@
              hover-fn left-click-fn right-click-fn
              cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? initial-color)))
 
+
 (def tickets (atom 0))
+
+
+(defn get-main-raster []
+  (:obj (mc/get-object-from-object-store :rst1)))
 
 
 (defn take-ticket! []
@@ -85,7 +90,8 @@
                     (let [w (get-in arg-map [:w :val])
                           h (get-in arg-map [:h :val])
                           parent-raster-atom
-                          (get-in @mc/mui-state [:implicits :parent-raster-atom])
+                          (get-main-raster)
+
                           brush (new-brush parent-raster-atom
                                            [w h]
                                            [100 100])]
@@ -113,7 +119,7 @@
                               (let [w (get-in arg-map [:w :val])
                                     h (get-in arg-map [:h :val])
                                     parent-raster-atom
-                                    (get-in @mc/mui-state [:implicits :parent-raster-atom])
+                                    (get-main-raster)
                                     brush (new-brush parent-raster-atom
                                                      [w h]
                                                      [100 100])]
@@ -134,7 +140,7 @@
                      {:fn   (fn [arg-map]
                               (let [c (get-in arg-map [:c :val])
                                     parent-raster-atom
-                                    (get-in @mc/mui-state [:implicits :parent-raster-atom])]
+                                    (get-main-raster)]
 
                                 (set-color! parent-raster-atom c)
                                 #_(swap! parent-raster-atom assoc :color c)
@@ -156,7 +162,7 @@
                          {:fn   (fn [arg-map]
                                   (let [c (get-in arg-map [:c :val])
                                         parent-raster-atom
-                                        (get-in @mc/mui-state [:implicits :parent-raster-atom])]
+                                        (get-main-raster)]
 
                                     (set-color! parent-raster-atom c)
                                     #_(swap! parent-raster-atom assoc :color c)
