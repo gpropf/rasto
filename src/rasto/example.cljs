@@ -124,7 +124,7 @@
                      :default-rule-frame-screen-height  150
                      :default-da-width                  60
                      :default-da-height                 40
-                     :default-download-filename         "rules.edn"
+                     :default-download-filename         "rasto-example.edn"
                      :default-rf-dimensions             "5,5"
                      :default-starting-rule-frame-index 1
                      :default-grid-dimensions           "60,40"
