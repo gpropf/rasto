@@ -24,8 +24,9 @@
                    color                                    ;The current color to use for drawing cells.
                    ])
 
+
 (defn raw-data-array
-  "Returns a raw rule-array cleared to provided value or 0."
+  "Returns a raw rule-array cleared to provided value."
   ([[width height] cell-state]
    (raw-data-array [width height] cell-state false))
   ([[width height] cell-state ^boolean transpose?]
@@ -51,26 +52,37 @@
              cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? initial-color)))
 
 
+;; A ticket system for Rasto to provide unique id numbers.
 (def tickets (atom 0))
 
 
-(defn get-main-raster []
+(defn get-main-raster
+  "A utility function to simplify getting the first raster we create. We're
+   assuming that any app that uses this library will have at least one main
+   Raster. This was specifically written to facilitate the writing of the
+   rasto.example app and perhaps belongs there instead of here."
+  []
   (:obj (mc/get-object-from-object-store :rst1)))
 
 
-(defn take-ticket! []
-  (let [ticket-num @tickets]
-    #_(println "Ticket #" ticket-num " taken.")
+(defn take-ticket!
+  "Get a ticket and increment the counter."
+  []
+  (let
+    [ticket-num @tickets]
     (swap! tickets inc)))
+
 
 (defn set-color! [raster-atom c]
   (let [raster @raster-atom]
     (swap! raster-atom assoc :color c)
     (mapv (fn [brush]
-            (set-color! brush c)
-            ) (:brushes raster))))
+            (set-color! brush c)) (:brushes raster))))
 
-(defn new-brush [raster-atom [w h] [sw sh]]
+
+(defn new-brush
+  "Creates a new Raster set up as a brush."
+  [raster-atom [w h] [sw sh]]
   (let [raster @raster-atom
         brush (make-raster [w h] [sw sh] 0
                            (keyword
@@ -113,207 +125,165 @@
 
 
 
-(def rasto-cmd-map {:app-cmds
-                    {:b
-                     {:fn   (fn [arg-map]
-                              (let [w (get-in arg-map [:w :val])
-                                    h (get-in arg-map [:h :val])
-                                    parent-raster-atom
-                                    (get-main-raster)
-                                    brush (new-brush parent-raster-atom
-                                                     [w h]
-                                                     [100 100])]
-                                (swap! parent-raster-atom update :brushes conj brush)
-                                (println "NEW BRUSH: " brush)
-                                (println "ARG-MAP in applied fn: " arg-map)
-                                (println "Creating new brush, width: " w
-                                         ", height: " h)))
-                      :args
-                            {:w
-                             {:prompt "Width of new brush?"
-                              :type   :int}
-                             :h
-                             {:prompt "Height of new brush?"
-                              :type   :int}}
-                      :help {:msg "b\t: Make new brush."}}
-                     :c
-                     {:fn   (fn [arg-map]
-                              (let [c (get-in arg-map [:c :val])
-                                    parent-raster-atom
-                                    (get-main-raster)]
-
-                                (set-color! parent-raster-atom c)
-                                #_(swap! parent-raster-atom assoc :color c)
-                                (println "NEW COLOR: " c)))
-                      :args
-                            {:c
-                             {:prompt "New color value (1-9)?"
-                              :type   :int}}
-                      :help {:msg "c\t: Change working color."}}}})
-
 
 
 (def rasto-cmd-maps {:key-sym-keystroke-map {
-                         :c    [67 false false false false]
+                                             :c [67 false false false false]
 
-                         }
+                                             }
 
- :cmd-func-map          {:c
-                         {:fn   (fn [arg-map]
-                                  (let [c (get-in arg-map [:c :val])
-                                        parent-raster-atom
-                                        (get-main-raster)]
+                     :cmd-func-map          {:c
+                                             {:fn               (fn [arg-map]
+                                                                  (let [c (get-in arg-map [:c :val])
+                                                                        parent-raster-atom
+                                                                        (get-main-raster)]
 
-                                    (set-color! parent-raster-atom c)
-                                    #_(swap! parent-raster-atom assoc :color c)
-                                    (println "NEW COLOR: " c)))
-                          :args
-                                {:c
-                                 {:prompt "New color value (1-9)?"
-                                  :type   :int}}
-                          :help {:msg "c\t: Change working color."}
-                          :active-in-states (set [:normal])}
+                                                                    (set-color! parent-raster-atom c)
+                                                                    #_(swap! parent-raster-atom assoc :color c)
+                                                                    (println "NEW COLOR: " c)))
+                                              :args
+                                                                {:c
+                                                                 {:prompt "New color value (1-9)?"
+                                                                  :type   :int}}
+                                              :help             {:msg "c\t: Change working color."}
+                                              :active-in-states (set [:normal])}
 
+                                             }
 
+                     })
 
+(defn relative-xy-to-grid-xy
+  "For the given raster transform screen coordinates relative to the
+  upper-left corner of its svg element into grid coordinates using its
+  internal grid system.  Returns an [int int] vec."
+  [[x y] raster]
+  (let [[w h] (:dimensions raster)
+        [sw sh] (:screen-dimensions raster)
 
-
-                         }
-
-})
-
- (defn relative-xy-to-grid-xy
-   "For the given raster transform screen coordinates relative to the
-   upper-left corner of its svg element into grid coordinates using its
-   internal grid system.  Returns an [int int] vec."
-   [[x y] raster]
-   (let [[w h] (:dimensions raster)
-         [sw sh] (:screen-dimensions raster)
-
-         width-to-screen-width-ratio (/ w sw)
-         height-to-screen-height-ratio (/ h sh)]
-     (map #(int %) [(* x width-to-screen-width-ratio) (* y height-to-screen-height-ratio)])))
+        width-to-screen-width-ratio (/ w sw)
+        height-to-screen-height-ratio (/ h sh)]
+    (map #(int %) [(* x width-to-screen-width-ratio) (* y height-to-screen-height-ratio)])))
 
 
-                        (defn set-cell
-                          "Set the cell at [x y] to cell-state"
-                          [raster [x y] cell-state]
-                          (assoc-in raster [:raw-data x y] cell-state))
+(defn set-cell
+  "Set the cell at [x y] to cell-state"
+  [raster [x y] cell-state]
+  (assoc-in raster [:raw-data x y] cell-state))
 
 
- (defn list-cells
-   "Pseudo-code:
+(defn list-cells
+  "Pseudo-code:
 
-    1. Create a row-col indexed map of the cell values in :raw-data
+   1. Create a row-col indexed map of the cell values in :raw-data
 
-    2. Filter that map based on whether the :cell-is-visible-fn returns
-       true for that cell
+   2. Filter that map based on whether the :cell-is-visible-fn returns
+      true for that cell
 
-    3. Use apply/concat to flatten the results as in the example in
-       https://clojuredocs.org/clojure.core/concat
+   3. Use apply/concat to flatten the results as in the example in
+      https://clojuredocs.org/clojure.core/concat
 
-   4. Return the results as a vector of 3-vectors [x y cell-state]."
-   [raster]
-   (vec (map #(-> % vec)
-             (apply concat (map-indexed
-                             (fn [col e]
-                               (let [value-mapping
-                                     (map-indexed
-                                       (fn [row ee] [col, row, ee]) e)]
-                                 (filter (fn [[_, _, v]]
-                                           ((:cell-is-visible-fn raster) v))
-                                         value-mapping)))
-                             (:raw-data raster))))))
-
-
-                        (defn raster-view-grid
-                          "Makes the grid of lines that divide the Raster into cells."
-                          [raster]
-                          (let [[w h] (:dimensions raster)]
-                            (concat (map
-                                      (fn [y] (str "M 0 " y " L " w " " y))
-                                      (range 0 h))
-                                    (map
-                                      (fn [x] (str "M " x " 0 L " x " " h))
-                                      (range 0 w)))))
+  4. Return the results as a vector of 3-vectors [x y cell-state]."
+  [raster]
+  (vec (map #(-> % vec)
+            (apply concat (map-indexed
+                            (fn [col e]
+                              (let [value-mapping
+                                    (map-indexed
+                                      (fn [row ee] [col, row, ee]) e)]
+                                (filter (fn [[_, _, v]]
+                                          ((:cell-is-visible-fn raster) v))
+                                        value-mapping)))
+                            (:raw-data raster))))))
 
 
- (defn raster-view
-   "Provides a visual representation of the Raster and basic
-   interactivity with it to allow the user to modify the contents. The
-   left-click-fn and other mouse action functions are a bit
-   tricky. Instead of being mouse event handlers they must be functions
-   that accept a raster-atom and return a mouse event handler. This is
-   to allow the fields of our Raster object to play a role in the
-   behavior of the mouse event handlers even though they are single
-   valued functions with no room for arbitrary extra args like our
-   raster-atom. See the rasto-test code for examples of how these
-   work."
-   [raster-atom app-cfg app-cmd-map]
-   (let [raster @raster-atom
-         [w h] (:dimensions raster)
-         [sw sh] (:screen-dimensions raster)
-         cells-to-show (list-cells raster)
-         grid-path-key (rut/genkey "grid-path-key_")
-         brushes (:brushes raster)
-         is-brush? (:is-brush? raster)]
-     [:div {:style {:float "left"}}
-      ; (println "rasto/core - CMDS1: ")
-      ; (pprint app-cfg)
-      ; {:c [67 false false false false]}
-      (when (false? is-brush?)
-        [mc/mui-gui2 (:mui-cfg app-cfg) (merge rasto-cmd-maps app-cmd-map)])
-      (when (not-empty brushes)
-        [:div {:id "brushes"} (map (fn [brush-raster-atom]
-                                     ^{:key (rut/genkey "brush")} [raster-view brush-raster-atom app-cfg])
-                                   brushes)])
-      [:svg {:id                  (rut/key-to-string (:id raster))
-             :style               {:margin-left "0.5em" :border "medium solid green"}
-             :stroke              "darkgrey"
-             :stroke-width        0.02
-             :fill                "dodgerblue"
-             ;:class        "drawing raster"
-             :height              sh
-             :width               sw
-             :viewBox             [0 0 w h]
-             :on-context-menu     ((:right-click-fn raster) raster-atom)
-             :on-click            ((:left-click-fn raster) raster-atom)
-             :on-mouse-move       ((:hover-fn raster) raster-atom)
-             :on-mouse-down       (if (not (:is-brush? raster)) ((:mouse-down-fn raster) raster-atom) nil)
-             :on-mouse-up         (if (not (:is-brush? raster)) ((:mouse-up-fn raster) raster-atom) nil)
-             :preserveAspectRatio "none"}
-       [:rect {:key    :bkgd-rect
-               :id     :bkgd-rect
-               :width  w
-               :height h
-               :fill   "#ffe"}]
-       [:path {:key          grid-path-key
-               :id           grid-path-key
-               :d            (raster-view-grid raster)
-               :stroke       "lightgrey"
-               :stroke-width 0.02}]
-       (let [[mx my] (:last-mouse-location raster)
-             mouse-cell-key (rut/key-to-string "mouse-cell" [mx my])]
-         [:rect {:id           mouse-cell-key
-                 :x            mx
-                 :key          mouse-cell-key
-                 :y            my
-                 :width        1
-                 :height       1
-                 :fill         "none"
-                 :stroke       "green"
-                 :stroke-width 0.03}])
-       (map (fn [[x y cell-state]]
-              (let [cell-key (rut/key-to-string "cell" [x y])]
-                ^{:key (rut/genkey "cell")}
-                [:rect {:id     cell-key
-                        :x      x
-                        :key    cell-key
-                        :y      y
-                        :width  1
-                        :height 1
-                        :fill   ((:cell-color-map app-cfg)
-                                 ((:cell-state-to-color-index-fn raster) cell-state))}]))
-            cells-to-show)]
+(defn raster-view-grid
+  "Makes the grid of lines that divide the Raster into cells."
+  [raster]
+  (let [[w h] (:dimensions raster)]
+    (concat (map
+              (fn [y] (str "M 0 " y " L " w " " y))
+              (range 0 h))
+            (map
+              (fn [x] (str "M " x " 0 L " x " " h))
+              (range 0 w)))))
 
-      ]))
+
+(defn raster-view
+  "Provides a visual representation of the Raster and basic
+  interactivity with it to allow the user to modify the contents. The
+  left-click-fn and other mouse action functions are a bit
+  tricky. Instead of being mouse event handlers they must be functions
+  that accept a raster-atom and return a mouse event handler. This is
+  to allow the fields of our Raster object to play a role in the
+  behavior of the mouse event handlers even though they are single
+  valued functions with no room for arbitrary extra args like our
+  raster-atom. See the rasto-test code for examples of how these
+  work."
+  [raster-atom app-cfg app-cmd-map]
+  (let [raster @raster-atom
+        [w h] (:dimensions raster)
+        [sw sh] (:screen-dimensions raster)
+        cells-to-show (list-cells raster)
+        grid-path-key (rut/genkey "grid-path-key_")
+        brushes (:brushes raster)
+        is-brush? (:is-brush? raster)]
+    [:div {:style {:float "left"}}
+     ; (println "rasto/core - CMDS1: ")
+     ; (pprint app-cfg)
+     ; {:c [67 false false false false]}
+     (when (false? is-brush?)
+       [mc/mui-gui2 (:mui-cfg app-cfg) (merge rasto-cmd-maps app-cmd-map)])
+     (when (not-empty brushes)
+       [:div {:id "brushes"} (map (fn [brush-raster-atom]
+                                    ^{:key (rut/genkey "brush")} [raster-view brush-raster-atom app-cfg])
+                                  brushes)])
+     [:svg {:id                  (rut/key-to-string (:id raster))
+            :style               {:margin-left "0.5em" :border "medium solid green"}
+            :stroke              "darkgrey"
+            :stroke-width        0.02
+            :fill                "dodgerblue"
+            ;:class        "drawing raster"
+            :height              sh
+            :width               sw
+            :viewBox             [0 0 w h]
+            :on-context-menu     ((:right-click-fn raster) raster-atom)
+            :on-click            ((:left-click-fn raster) raster-atom)
+            :on-mouse-move       ((:hover-fn raster) raster-atom)
+            :on-mouse-down       (if (not (:is-brush? raster)) ((:mouse-down-fn raster) raster-atom) nil)
+            :on-mouse-up         (if (not (:is-brush? raster)) ((:mouse-up-fn raster) raster-atom) nil)
+            :preserveAspectRatio "none"}
+      [:rect {:key    :bkgd-rect
+              :id     :bkgd-rect
+              :width  w
+              :height h
+              :fill   "#ffe"}]
+      [:path {:key          grid-path-key
+              :id           grid-path-key
+              :d            (raster-view-grid raster)
+              :stroke       "lightgrey"
+              :stroke-width 0.02}]
+      (let [[mx my] (:last-mouse-location raster)
+            mouse-cell-key (rut/key-to-string "mouse-cell" [mx my])]
+        [:rect {:id           mouse-cell-key
+                :x            mx
+                :key          mouse-cell-key
+                :y            my
+                :width        1
+                :height       1
+                :fill         "none"
+                :stroke       "green"
+                :stroke-width 0.03}])
+      (map (fn [[x y cell-state]]
+             (let [cell-key (rut/key-to-string "cell" [x y])]
+               ^{:key (rut/genkey "cell")}
+               [:rect {:id     cell-key
+                       :x      x
+                       :key    cell-key
+                       :y      y
+                       :width  1
+                       :height 1
+                       :fill   ((:cell-color-map app-cfg)
+                                ((:cell-state-to-color-index-fn raster) cell-state))}]))
+           cells-to-show)]
+
+     ]))
