@@ -94,7 +94,7 @@
 
 
 (mc/register-application-defined-type
-  "Brush"
+  :Brush
   {:new
            {:fn   (fn [arg-map]
                     (let [w (get-in arg-map [:w :val])
@@ -104,7 +104,7 @@
                                            [w h]
                                            [100 100])]
                       (swap! parent-raster-atom update :brushes conj brush)
-                      (mc/add-object-to-object-store brush "Brush" (:id @brush) (:id @parent-raster-atom))
+                      (mc/add-object-to-object-store brush :Brush (:id @brush) (:id @parent-raster-atom))
                       (println "NEW BRUSH: " brush)
                       (println "ARG-MAP in applied fn: " arg-map)
                       (println "Creating new brush, width: " w ", height: " h)

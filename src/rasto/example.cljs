@@ -90,18 +90,18 @@
 (swap! raster-atom assoc :mouse-up-fn mouse-up-fn)
 
 (mc/register-application-defined-type
-  "Raster"
+  :Raster
   {:new
            {:fn   (fn [arg-map]
                     (let [w (get-in arg-map [:w :val])
                           h (get-in arg-map [:h :val])]
-                      #_(mc/add-object-to-object-store raster-atom "Raster" :rst1 nil)
+                      #_(mc/add-object-to-object-store raster-atom :Raster :rst1 nil)
                       (swap! mc/mui-state assoc :return-to-normal true)))
             :args {}}
    :delete {}})
 
 
-(mc/add-object-to-object-store raster-atom "Raster" :rst1 nil)
+(mc/add-object-to-object-store raster-atom :Raster :rst1 nil)
 
 
 
