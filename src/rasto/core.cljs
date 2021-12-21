@@ -5,9 +5,7 @@
     [reagent.core :as reagent :refer [atom]]
     [cljs.pprint :as pp :refer [pprint]]
     [rasto.util :as rut]
-    #_[rasto.mui :as rm]
-    [mui.core :as mc]
-    ))
+    [mui.core :as mc]))
 
 
 (defrecord Raster [dimensions                               ;width and height in abstract units as a 2-vec: [w h].
@@ -26,7 +24,7 @@
 
 
 (defn raw-data-array
-  "Returns a raw rule-array cleared to provided value."
+  "Returns a raw cell-array cleared to provided value."
   ([[width height] cell-state]
    (raw-data-array [width height] cell-state false))
   ([[width height] cell-state ^boolean transpose?]
@@ -101,9 +99,7 @@
            {:fn   (fn [arg-map]
                     (let [w (get-in arg-map [:w :val])
                           h (get-in arg-map [:h :val])
-                          parent-raster-atom
-                          (get-main-raster)
-
+                          parent-raster-atom (get-main-raster)
                           brush (new-brush parent-raster-atom
                                            [w h]
                                            [100 100])]
@@ -124,42 +120,29 @@
    :delete {}})
 
 
-
-
-
-(def rasto-cmd-maps {:key-sym-keystroke-map {
-                                             :c [67 false false false false]
-
-                                             }
-
+(def rasto-cmd-maps {:key-sym-keystroke-map {:c [67 false false false false]}
                      :cmd-func-map          {:c
                                              {:fn               (fn [arg-map]
                                                                   (let [c (get-in arg-map [:c :val])
                                                                         parent-raster-atom
                                                                         (get-main-raster)]
-
                                                                     (set-color! parent-raster-atom c)
-                                                                    #_(swap! parent-raster-atom assoc :color c)
                                                                     (println "NEW COLOR: " c)))
                                               :args
                                                                 {:c
                                                                  {:prompt "New color value (1-9)?"
                                                                   :type   :int}}
                                               :help             {:msg "c\t: Change working color."}
-                                              :active-in-states (set [:normal])}
+                                              :active-in-states (set [:normal])}}})
 
-                                             }
-
-                     })
 
 (defn relative-xy-to-grid-xy
-  "For the given raster transform screen coordinates relative to the
+  "For the given raster, transform screen coordinates relative to the
   upper-left corner of its svg element into grid coordinates using its
-  internal grid system.  Returns an [int int] vec."
+  internal grid system. Returns an [int int] vec."
   [[x y] raster]
   (let [[w h] (:dimensions raster)
         [sw sh] (:screen-dimensions raster)
-
         width-to-screen-width-ratio (/ w sw)
         height-to-screen-height-ratio (/ h sh)]
     (map #(int %) [(* x width-to-screen-width-ratio) (* y height-to-screen-height-ratio)])))
@@ -284,6 +267,4 @@
                        :height 1
                        :fill   ((:cell-color-map app-cfg)
                                 ((:cell-state-to-color-index-fn raster) cell-state))}]))
-           cells-to-show)]
-
-     ]))
+           cells-to-show)]]))
