@@ -23,6 +23,11 @@ design document.
 
 ###Mui
 
+ * There should only be one selected object at a time for 
+   the whole Mui system, not one for each type as at present.
+ * :brushes in Raster should not be a vector but a map,  with
+    brushes indexed by :id
+ * 
  * Selection by any method (i.e. mouse over/click, select
    command, etc.) should cause selection query to move on. 
  * Read/Write objects to local file along with a

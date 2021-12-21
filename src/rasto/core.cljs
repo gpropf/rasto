@@ -20,6 +20,7 @@
                    brushes                                  ;List of small rasters used as brushes to draw on the larger one.
                    is-brush?                                ;boolean: true if this is a brush of another raster.
                    color                                    ;The current color to use for drawing cells.
+                   parent-id                                ;The id of the Raster that contains this one.
                    ])
 
 
@@ -38,16 +39,16 @@
   "Constructor function for the Raster."
   ([[w h] [sw sh] default-value id
     hover-fn left-click-fn right-click-fn
-    cell-state-to-color-index-fn cell-is-visible-fn]
+    cell-state-to-color-index-fn cell-is-visible-fn ]
    (make-raster [w h] [sw sh] default-value id
                 hover-fn left-click-fn right-click-fn
-                cell-state-to-color-index-fn cell-is-visible-fn [] false 1))
+                cell-state-to-color-index-fn cell-is-visible-fn [] false 1 nil))
   ([[w h] [sw sh] default-value id
     hover-fn left-click-fn right-click-fn
-    cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? initial-color]
+    cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? initial-color parent-id]
    (->Raster [w h] [sw sh] (raw-data-array [w h] default-value) id
              hover-fn left-click-fn right-click-fn
-             cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? initial-color)))
+             cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? initial-color parent-id)))
 
 
 ;; A ticket system for Rasto to provide unique id numbers.
@@ -89,7 +90,7 @@
                            (:left-click-fn @raster-atom)
                            (:right-click-fn @raster-atom)
                            (:cell-state-to-color-index-fn raster)
-                           (:cell-is-visible-fn raster) [] true (:color raster))]
+                           (:cell-is-visible-fn raster) [] true (:color raster) (:id raster))]
     (atom brush)))
 
 
