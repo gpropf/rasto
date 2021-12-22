@@ -42,7 +42,7 @@
     cell-state-to-color-index-fn cell-is-visible-fn ]
    (make-raster [w h] [sw sh] default-value id
                 hover-fn left-click-fn right-click-fn
-                cell-state-to-color-index-fn cell-is-visible-fn [] false 1 nil))
+                cell-state-to-color-index-fn cell-is-visible-fn {} false 1 nil))
   ([[w h] [sw sh] default-value id
     hover-fn left-click-fn right-click-fn
     cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? initial-color parent-id]
@@ -75,7 +75,7 @@
 (defn set-color! [raster-atom c]
   (let [raster @raster-atom]
     (swap! raster-atom assoc :color c)
-    (mapv (fn [brush]
+    (mapv (fn [[brush-id brush]]
             (set-color! brush c)) (:brushes raster))))
 
 
@@ -94,6 +94,12 @@
     (atom brush)))
 
 
+(defn delete-brush! [raster-atom brush-id]
+  (swap! raster-atom update :brushes dissoc brush-id))
+
+
+
+
 (mc/register-application-defined-type
   :Brush
   {:new
@@ -104,7 +110,8 @@
                           brush (new-brush parent-raster-atom
                                            [w h]
                                            [100 100])]
-                      (swap! parent-raster-atom update :brushes conj brush)
+                      #_(swap! parent-raster-atom update :brushes conj brush)
+                      (swap! parent-raster-atom update :brushes conj {(:id @brush) brush})
                       (mc/add-object-to-object-store brush :Brush (:id @brush) (:id @parent-raster-atom))
                       (println "NEW BRUSH: " brush)
                       (println "ARG-MAP in applied fn: " arg-map)
@@ -218,7 +225,7 @@
      (when (false? is-brush?)
        [mc/mui-gui2 (:mui-cfg app-cfg) (merge rasto-cmd-maps app-cmd-map)])
      (when (not-empty brushes)
-       [:div {:id "brushes"} (map (fn [brush-raster-atom]
+       [:div {:id "brushes"} (map (fn [[brush-id brush-raster-atom]]
                                     ^{:key (rut/genkey "brush")} [raster-view brush-raster-atom app-cfg])
                                   brushes)])
      [:svg {:id                  (rut/key-to-string (:id raster))
