@@ -136,10 +136,15 @@
    :delete {:fn   (fn [arg-map]
                     (let [;;brush-atom (get-in arg-map [:selected-object :val])
                           brush-atom-id (get-in arg-map [:selected-obj-id :val])
+                          brush-atom-map (mc/get-object-from-object-store :Brush brush-atom-id)
+                          brush-parent-atom-id (:parent-obj-id brush-atom-map)
+                          brush-parent-atom (:obj (mc/get-object-from-object-store brush-parent-atom-id))
                           ;;cmd-txtarea (. js/document getElementById "command-window")  ;; FIXME - it can't find the field!
                           ]
                       (println "ARG-MAP in delete fn: " arg-map)
                       (println (str "Would be deleting the Brush: " brush-atom-id))
+                      (println (str "Brush has parent with id: " brush-parent-atom-id))
+                      (swap! brush-parent-atom update :brushes dissoc brush-atom-id)
                       #_(mc/println-fld cmd-txtarea (str "Would be deleting the Brush: " brush-atom-id))
 
                       #_(mc/println-fld cmd-txtarea "FOOOOOOOOOOOOOOOOOOOOO")
