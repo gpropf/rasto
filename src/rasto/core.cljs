@@ -17,10 +17,10 @@
                    right-click-fn                           ;run for right click.
                    cell-state-to-color-index-fn             ;translate a cell's state into a color index fn.
                    cell-is-visible-fn                       ;decide whether the cell should be visible or not.
-                   brushes                                  ;List of small rasters used as brushes to draw on the larger one.
+                   brushes                                  ;map of small rasters used as brushes to draw on the larger one.
                    is-brush?                                ;boolean: true if this is a brush of another raster.
                    color                                    ;The current color to use for drawing cells.
-                   parent-id                                ;The id of the Raster that contains this one.
+                   parent-raster-atom                       ;The raster that contains this one.
                    ])
 
 
@@ -39,16 +39,16 @@
   "Constructor function for the Raster."
   ([[w h] [sw sh] default-value id
     hover-fn left-click-fn right-click-fn
-    cell-state-to-color-index-fn cell-is-visible-fn ]
+    cell-state-to-color-index-fn cell-is-visible-fn]
    (make-raster [w h] [sw sh] default-value id
                 hover-fn left-click-fn right-click-fn
                 cell-state-to-color-index-fn cell-is-visible-fn {} false 1 nil))
   ([[w h] [sw sh] default-value id
     hover-fn left-click-fn right-click-fn
-    cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? initial-color parent-id]
+    cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? initial-color parent-raster-atom]
    (->Raster [w h] [sw sh] (raw-data-array [w h] default-value) id
              hover-fn left-click-fn right-click-fn
-             cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? initial-color parent-id)))
+             cell-state-to-color-index-fn cell-is-visible-fn brushes is-brush? initial-color parent-raster-atom)))
 
 
 ;; A ticket system for Rasto to provide unique id numbers.
@@ -98,6 +98,14 @@
   (swap! raster-atom update :brushes dissoc brush-id))
 
 
+(defn delete-brush2! [brush]
+  (let [parent-raster-atom (:parent-raster-atom brush)
+        brush-id (:id brush)]
+    (swap! parent-raster-atom update :brushes dissoc brush-id)
+
+    ))
+
+
 
 
 (mc/register-application-defined-type
@@ -125,7 +133,21 @@
                    {:prompt "Height of new brush?"
                     :type   :int}}
             :help {:msg "b\t: Make new brush."}}
-   :delete {}})
+   :delete {:fn   (fn [arg-map]
+                    (let [;;brush-atom (get-in arg-map [:selected-object :val])
+                          brush-atom-id (get-in arg-map [:selected-obj-id :val])
+                          ;;cmd-txtarea (. js/document getElementById "command-window")  ;; FIXME - it can't find the field!
+                          ]
+                      (println "ARG-MAP in delete fn: " arg-map)
+                      (println (str "Would be deleting the Brush: " brush-atom-id))
+                      #_(mc/println-fld cmd-txtarea (str "Would be deleting the Brush: " brush-atom-id))
+
+                      #_(mc/println-fld cmd-txtarea "FOOOOOOOOOOOOOOOOOOOOO")
+                      ))
+            :args {}
+            :help {}
+
+            }})
 
 
 (def rasto-cmd-maps {:key-sym-keystroke-map {:c [67 false false false false]}
