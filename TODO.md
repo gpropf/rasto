@@ -18,25 +18,26 @@ design document.
 * Replay history to recreate objects.
 * Command for adding cells.
 * Integrate the inverse mapping function into the cmd-maps.
-* Add checks to make sure all commands have a keystroke mapping.
+* **[ON HOLD]** Add checks to make sure all commands have a keystroke mapping.
 * Draw with brushes.
 
 ###Mui
 
- * There should only be one selected object at a time for 
+ * Read objects from local file along with a load command. The write
+   behavior is already implemented but may need work.
+ * Ability to write characters into textareas. This is useful for writing tests.
+ * **[DONE]** There should only be one selected object at a time for 
    the whole Mui system, not one for each type as at present.
- * :brushes in Raster should not be a vector but a map,  with
+ * **[DONE]** :brushes in Raster should not be a vector but a map,  with
     brushes indexed by :id
- * 
- * Selection by any method (i.e. mouse over/click, select
+ * **[ON HOLD]** Selection by any method (i.e. mouse over/click, select
    command, etc.) should cause selection query to move on. 
- * Read/Write objects to local file along with a
-   load/save pair of commands.
- * Function to look at arglists of metadata
+ 
+ * **[ON HOLD]** Function to look at arglists of metadata
    and create a command map with prompts for each arg.
- * Need a way to edit the prompts and types of args for
+ * **[ON HOLD]** Need a way to edit the prompts and types of args for
    functions.
- * Need to be able to save/load functions and types for
+ * **[ON HOLD]** Need to be able to save/load functions and types for
    each app.
 
 

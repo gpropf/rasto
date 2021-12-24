@@ -155,7 +155,10 @@
             }})
 
 
-(def rasto-cmd-maps {:key-sym-keystroke-map {:c [67 false false false false]}
+(def rasto-cmd-maps {:key-sym-keystroke-map {:c [67 false false false false]
+
+                                             :p [80 false false false false]
+                                             }
                      :cmd-func-map          {:c
                                              {:fn               (fn [arg-map]
                                                                   (let [c (get-in arg-map [:c :val])
@@ -168,7 +171,17 @@
                                                                  {:prompt "New color value (1-9)?"
                                                                   :type   :int}}
                                               :help             {:msg "c\t: Change working color."}
-                                              :active-in-states (set [:normal])}}})
+                                              :active-in-states (set [:normal])}
+                                             :p
+                                             {:fn               (fn [arg-map]
+                                                                  (let [pxls (get-in arg-map [:pxls :val])]
+                                                                    (println "Integers for cells as text: " pxls)))
+                                              :args             {:pxls
+                                                                 {:prompt "Enter a cell value or values"
+                                                                  :type   :int-list}}
+                                              :help             {:msg "p\t: Place pixel(s)"}
+                                              :active-in-states (set [:normal])}
+                                             }})
 
 
 (defn relative-xy-to-grid-xy
