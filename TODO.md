@@ -25,6 +25,9 @@ design document.
 
  * Read objects from local file along with a load command. The write
    behavior is already implemented but may need work.
+ * Switch from textarea to editable HTML by using normal elements with
+   contentEditable="true" as attributes.
+   See https://www.tutorialrepublic.com/codelab.php?topic=faq&file=html5-make-element-editable
  * Ability to write characters into textareas. This is useful for writing tests.
  * **[DONE]** There should only be one selected object at a time for 
    the whole Mui system, not one for each type as at present.

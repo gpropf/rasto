@@ -105,6 +105,28 @@
 
     ))
 
+(defn set-cell
+  "Set the cell at [x y] to cell-state"
+  ([raster [x y cell-state]]
+   (set-cell raster [x y] cell-state))
+  ([raster [x y] cell-state]
+   (assoc-in raster [:raw-data x y] cell-state)))
+
+
+(defn set-cell! [raster-atom [x y cell-state]]
+  (reset! raster-atom (set-cell @raster-atom [x y cell-state])))
+
+
+(defn set-cells! [raster-atom ints]
+  (let [len-ints (count ints)
+        r (mod len-ints 3)
+        num-ints-to-vectorize (- len-ints r)
+        ints-to-vectorize (take num-ints-to-vectorize ints)
+        vec3s (map vec (partition 3 ints-to-vectorize))
+        ]
+    (doseq [v vec3s]
+      (set-cell! raster-atom v))))
+
 
 
 
@@ -175,6 +197,7 @@
                                              :p
                                              {:fn               (fn [arg-map]
                                                                   (let [pxls (get-in arg-map [:pxls :val])]
+                                                                    (set-cells! (get-main-raster) pxls)
                                                                     (println "Integers for cells as text: " pxls)))
                                               :args             {:pxls
                                                                  {:prompt "Enter a cell value or values"
@@ -196,10 +219,12 @@
     (map #(int %) [(* x width-to-screen-width-ratio) (* y height-to-screen-height-ratio)])))
 
 
-(defn set-cell
-  "Set the cell at [x y] to cell-state"
-  [raster [x y] cell-state]
-  (assoc-in raster [:raw-data x y] cell-state))
+
+
+
+
+
+
 
 
 (defn list-cells
