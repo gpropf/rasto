@@ -288,7 +288,7 @@
      ; (pprint app-cfg)
      ; {:c [67 false false false false]}
      (when (false? is-brush?)
-       [mc/mui-gui2 (:mui-cfg app-cfg) (merge rasto-cmd-maps app-cmd-map)])
+       [mc/mui-gui (:mui-cfg app-cfg) (merge rasto-cmd-maps app-cmd-map)])
      (when (not-empty brushes)
        [:div {:id "brushes"} (map (fn [[brush-id brush-raster-atom]]
                                     ^{:key (rut/genkey "brush")} [raster-view brush-raster-atom app-cfg])
