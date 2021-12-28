@@ -264,6 +264,24 @@
               (range 0 w)))))
 
 
+(defn draw-cells-on-raster [raster cell-list offset app-cfg id]
+  (let [[offset-x offset-y] offset]
+    (println id " CELL-LIST: " cell-list)
+    (map (fn [[x y cell-state]]
+           (let [cell-key (rut/key-to-string "cell" [x y])]
+             ^{:key (rut/genkey "cell")}
+             [:rect {:id     cell-key
+                     :x      (+ x offset-x)
+                     :key    cell-key
+                     :y      (+ y offset-y)
+                     :width  1
+                     :height 1
+                     :fill   ((:cell-color-map app-cfg)
+                              ((:cell-state-to-color-index-fn raster) cell-state))}]))
+         cell-list)))
+
+
+
 (defn raster-view
   "Provides a visual representation of the Raster and basic
   interactivity with it to allow the user to modify the contents. The
@@ -289,10 +307,10 @@
      ; {:c [67 false false false false]}
      (when (false? is-brush?)
        [mc/mui-gui (:mui-cfg app-cfg) (merge rasto-cmd-maps app-cmd-map)])
-     (when (not-empty brushes)
+     [:div {:style {:float "left"}} (when (not-empty brushes)
        [:div {:id "brushes"} (map (fn [[brush-id brush-raster-atom]]
                                     ^{:key (rut/genkey "brush")} [raster-view brush-raster-atom app-cfg])
-                                  brushes)])
+                                  brushes)])]
      [:svg {:id                  (rut/key-to-string (:id raster))
             :style               {:margin-left "0.5em" :border "medium solid green"}
             :stroke              "darkgrey"
@@ -319,7 +337,9 @@
               :stroke       "lightgrey"
               :stroke-width 0.02}]
       (let [[mx my] (:last-mouse-location raster)
-            mouse-cell-key (rut/key-to-string "mouse-cell" [mx my])]
+            mouse-cell-key (rut/key-to-string "mouse-cell" [mx my])
+            ;;brush1 (:rst1-brush1 brushes)
+            ]
         [:rect {:id           mouse-cell-key
                 :x            mx
                 :key          mouse-cell-key
@@ -328,16 +348,7 @@
                 :height       1
                 :fill         "none"
                 :stroke       "green"
-                :stroke-width 0.03}])
-      (map (fn [[x y cell-state]]
-             (let [cell-key (rut/key-to-string "cell" [x y])]
-               ^{:key (rut/genkey "cell")}
-               [:rect {:id     cell-key
-                       :x      x
-                       :key    cell-key
-                       :y      y
-                       :width  1
-                       :height 1
-                       :fill   ((:cell-color-map app-cfg)
-                                ((:cell-state-to-color-index-fn raster) cell-state))}]))
-           cells-to-show)]]))
+                :stroke-width 0.03}]
+        #_(when brush1
+            (draw-cells-on-raster raster (list-cells brush1) [mx my] app-cfg :rst1-brush1)))
+       (draw-cells-on-raster raster cells-to-show [0 0] app-cfg (:id raster))]]))

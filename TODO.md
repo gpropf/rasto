@@ -15,8 +15,11 @@ design document.
 
 ###Rasto
 
+* Status readouts for selected object, mode, etc
 * Replay history to recreate objects.
 * Command for adding cells.
+* Command (no-key shortcut) for pushing and popping a stack
+  to save things like the selected object and then restore them.
 * Integrate the inverse mapping function into the cmd-maps.
 * **[ON HOLD]** Add checks to make sure all commands have a keystroke mapping.
 * Draw with brushes.

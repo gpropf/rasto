@@ -130,7 +130,9 @@
                      :default-grid-dimensions           "60,40"
                      :mui-cfg                           {:command-window {:style {:height        "auto"
                                                                                   :margin-bottom "5px"
-                                                                                  :float         "right"}
+                                                                                  :float         "right"
+                                                                                  :font-size     "8pt"
+                                                                                  }
                                                                           :id    "command-window"
                                                                           :rows  "8"
                                                                           :cols  "60"
