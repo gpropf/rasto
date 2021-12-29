@@ -229,16 +229,12 @@
 
 (defn list-cells
   "Pseudo-code:
-
    1. Create a row-col indexed map of the cell values in :raw-data
-
    2. Filter that map based on whether the :cell-is-visible-fn returns
       true for that cell
-
    3. Use apply/concat to flatten the results as in the example in
       https://clojuredocs.org/clojure.core/concat
-
-  4. Return the results as a vector of 3-vectors [x y cell-state]."
+   4. Return the results as a vector of 3-vectors [x y cell-state]."
   [raster]
   (vec (map #(-> % vec)
             (apply concat (map-indexed
@@ -264,7 +260,7 @@
               (range 0 w)))))
 
 
-(defn draw-cells-on-raster [raster cell-list offset app-cfg id]
+(defn draw-cells-on-raster [raster cell-list offset opacity app-cfg id]
   (let [[offset-x offset-y] offset]
     (println id " CELL-LIST: " cell-list)
     (map (fn [[x y cell-state]]
@@ -276,6 +272,7 @@
                      :y      (+ y offset-y)
                      :width  1
                      :height 1
+                     :opacity opacity
                      :fill   ((:cell-color-map app-cfg)
                               ((:cell-state-to-color-index-fn raster) cell-state))}]))
          cell-list)))
@@ -338,7 +335,7 @@
               :stroke-width 0.02}]
       (let [[mx my] (:last-mouse-location raster)
             mouse-cell-key (rut/key-to-string "mouse-cell" [mx my])
-            ;;brush1 (:rst1-brush1 brushes)
+            brush1 (:rst1-brush1 brushes)
             ]
         [:rect {:id           mouse-cell-key
                 :x            mx
@@ -350,5 +347,6 @@
                 :stroke       "green"
                 :stroke-width 0.03}]
         #_(when brush1
-            (draw-cells-on-raster raster (list-cells brush1) [mx my] app-cfg :rst1-brush1)))
-       (draw-cells-on-raster raster cells-to-show [0 0] app-cfg (:id raster))]]))
+          #_(println "TYPE brush1: " (type brush1))
+            (draw-cells-on-raster raster (list-cells @brush1) [mx my] 0.3 app-cfg :rst1-brush1)))
+       (draw-cells-on-raster raster cells-to-show [0 0] 1.0 app-cfg (:id raster))]]))
