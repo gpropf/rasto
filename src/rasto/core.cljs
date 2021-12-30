@@ -7,6 +7,8 @@
     [rasto.util :as rut]
     [mui.core :as mc]))
 
+(defrecord Foo [a b c])
+
 
 (defrecord Raster [dimensions                               ;width and height in abstract units as a 2-vec: [w h].
                    screen-dimensions                        ;screen width and height in pixels: [sw sh].
@@ -24,8 +26,11 @@
                    ])
 
 
-(def edn-readers {'rasto.core.Raster map->Raster
-                  'Atom #(atom %1) })
+(def edn-readers {
+                  'rasto.core.Raster map->Raster
+                  'rasto.core.Foo map->Foo
+                  ;;'Raster Raster
+                  })
 
 
 (defn raw-data-array
@@ -132,6 +137,25 @@
       (set-cell! raster-atom v))))
 
 
+
+(mc/register-application-defined-type
+  :Foo
+  {:new {:fn (fn [arg-map] (->Foo 4 5 6))
+         :args {}}
+   :delete {}} edn-readers)
+
+
+
+(mc/register-application-defined-type
+  :Raster
+  {:new
+           {:fn   (fn [arg-map]
+                    (let [w (get-in arg-map [:w :val])
+                          h (get-in arg-map [:h :val])]
+                      #_(mc/add-object-to-object-store raster-atom :Raster :rst1 nil)
+                      (swap! mc/mui-state assoc :return-to-normal true)))
+            :args {}}
+   :delete {}} edn-readers)
 
 
 (mc/register-application-defined-type
