@@ -7,7 +7,7 @@
     [rasto.util :as rut]
     [mui.core :as mc]))
 
-(defrecord Foo [a b c])
+
 
 
 (defrecord Raster [dimensions                               ;width and height in abstract units as a 2-vec: [w h].
@@ -26,11 +26,7 @@
                    ])
 
 
-(def edn-readers {
-                  'rasto.core.Raster map->Raster
-                  'rasto.core.Foo map->Foo
-                  ;;'Raster Raster
-                  })
+
 
 
 (defn raw-data-array
@@ -136,9 +132,13 @@
     (doseq [v vec3s]
       (set-cell! raster-atom v))))
 
+(def edn-readers (merge {
+                   'rasto.core.Raster map->Raster
+                   ;'mc.Foo map->mc.Foo
+                   ;;'Raster Raster
+                   } mc/mc-edn-reader))
 
-
-(mc/register-application-defined-type
+#_(mc/register-application-defined-type
   :Foo
   {:new {:fn (fn [arg-map] (->Foo 4 5 6))
          :args {}}
