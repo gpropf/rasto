@@ -1,4 +1,4 @@
-^{:watch-dirs ["src" "../mui/src"]
+^{:watch-dirs ["src" "../mui/src" "../gputils/src"]
   :css-dirs   ["resources"]}
 ;;  :open-url "http://localhost/mu"}
 {:main rasto.example

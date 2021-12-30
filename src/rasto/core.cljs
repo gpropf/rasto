@@ -24,6 +24,10 @@
                    ])
 
 
+(def edn-readers {'rasto.core.Raster map->Raster
+                  'Atom #(atom %1) })
+
+
 (defn raw-data-array
   "Returns a raw cell-array cleared to provided value."
   ([[width height] cell-state]
@@ -174,7 +178,8 @@
             :args {}
             :help {}
 
-            }})
+            }}
+  edn-readers)
 
 
 (def rasto-cmd-maps {:key-sym-keystroke-map {:c [67 false false false false]
@@ -266,15 +271,15 @@
     (map (fn [[x y cell-state]]
            (let [cell-key (rut/key-to-string "cell" [x y])]
              ^{:key (rut/genkey "cell")}
-             [:rect {:id     cell-key
-                     :x      (+ x offset-x)
-                     :key    cell-key
-                     :y      (+ y offset-y)
-                     :width  1
-                     :height 1
+             [:rect {:id      cell-key
+                     :x       (+ x offset-x)
+                     :key     cell-key
+                     :y       (+ y offset-y)
+                     :width   1
+                     :height  1
                      :opacity opacity
-                     :fill   ((:cell-color-map app-cfg)
-                              ((:cell-state-to-color-index-fn raster) cell-state))}]))
+                     :fill    ((:cell-color-map app-cfg)
+                               ((:cell-state-to-color-index-fn raster) cell-state))}]))
          cell-list)))
 
 
@@ -305,9 +310,9 @@
      (when (false? is-brush?)
        [mc/mui-gui (:mui-cfg app-cfg) (merge rasto-cmd-maps app-cmd-map)])
      [:div {:style {:float "left"}} (when (not-empty brushes)
-       [:div {:id "brushes"} (map (fn [[brush-id brush-raster-atom]]
-                                    ^{:key (rut/genkey "brush")} [raster-view brush-raster-atom app-cfg])
-                                  brushes)])]
+                                      [:div {:id "brushes"} (map (fn [[brush-id brush-raster-atom]]
+                                                                   ^{:key (rut/genkey "brush")} [raster-view brush-raster-atom app-cfg])
+                                                                 brushes)])]
      [:svg {:id                  (rut/key-to-string (:id raster))
             :style               {:margin-left "0.5em" :border "medium solid green"}
             :stroke              "darkgrey"
@@ -347,6 +352,6 @@
                 :stroke       "green"
                 :stroke-width 0.03}]
         #_(when brush1
-          #_(println "TYPE brush1: " (type brush1))
+            #_(println "TYPE brush1: " (type brush1))
             (draw-cells-on-raster raster (list-cells @brush1) [mx my] 0.3 app-cfg :rst1-brush1)))
-       (draw-cells-on-raster raster cells-to-show [0 0] 1.0 app-cfg (:id raster))]]))
+      (draw-cells-on-raster raster cells-to-show [0 0] 1.0 app-cfg (:id raster))]]))

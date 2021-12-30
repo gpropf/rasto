@@ -89,6 +89,7 @@
 (swap! raster-atom assoc :mouse-down-fn mouse-down-fn)
 (swap! raster-atom assoc :mouse-up-fn mouse-up-fn)
 
+
 (mc/register-application-defined-type
   :Raster
   {:new
@@ -98,7 +99,7 @@
                       #_(mc/add-object-to-object-store raster-atom :Raster :rst1 nil)
                       (swap! mc/mui-state assoc :return-to-normal true)))
             :args {}}
-   :delete {}})
+   :delete {}} rcore/edn-readers)
 
 
 (mc/add-object-to-object-store raster-atom :Raster :rst1 nil)
