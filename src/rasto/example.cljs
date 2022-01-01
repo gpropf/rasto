@@ -10,7 +10,8 @@
     [clojure.string :as str]
     [reagent.core :as reagent :refer [atom]]
     [cljs.pprint :as pp :refer [pprint]]
-    [rasto.util :as rut]))
+    [rasto.util :as rut]
+    [clojure.edn :as edn]))
 
 (enable-console-print!)
 
@@ -96,6 +97,15 @@
 (mc/add-object-to-object-store raster-atom :Raster :rst1 nil)
 
 
+(def map-atoms {:a (atom {:as-atom "aaa"}) :b {:submap (atom "Beez!")}})
+(pprint map-atoms)
+(def map-atoms-str (prn-str (mc/de-atomize map-atoms)))
+(println "map-atoms-str: " map-atoms-str)
+(def map-atoms-rehydrated (edn/read-string rcore/edn-readers map-atoms-str))
+(print "DESERIALIZED MAP: ")
+(pprint  map-atoms-rehydrated)
+(print "REHYDRATE MAP: ")
+(pprint (mc/atomize map-atoms-rehydrated))
 
 (defonce
   rasto-example-cfg {; :off-cell-color "#F5F5DC"

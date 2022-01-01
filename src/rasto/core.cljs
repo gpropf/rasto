@@ -8,6 +8,12 @@
     [mui.core :as mc]))
 
 
+(defrecord Foo [a b c id])
+
+(def foo-edn-reader {'rasto.core.Foo map->Foo})
+
+(def footest0 (->Foo 1 2 3 :foo-id-from-obj))
+
 
 
 (defrecord Raster [dimensions                               ;width and height in abstract units as a 2-vec: [w h].
@@ -26,8 +32,7 @@
                    ])
 
 
-
-
+(mc/add-object-to-object-store footest0 :Foo :foo0 nil)
 
 (defn raw-data-array
   "Returns a raw cell-array cleared to provided value."
@@ -95,7 +100,7 @@
                            (:left-click-fn @raster-atom)
                            (:right-click-fn @raster-atom)
                            (:cell-state-to-color-index-fn raster)
-                           (:cell-is-visible-fn raster) [] true (:color raster) (:id raster))]
+                           (:cell-is-visible-fn raster) {} true (:color raster) (:id raster))]
     (atom brush)))
 
 
@@ -136,7 +141,7 @@
                    'rasto.core.Raster map->Raster
                    ;'mc.Foo map->mc.Foo
                    ;;'Raster Raster
-                   } mc/mc-edn-reader))
+                   } foo-edn-reader))
 
 #_(mc/register-application-defined-type
   :Foo
