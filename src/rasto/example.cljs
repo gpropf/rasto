@@ -49,19 +49,15 @@
 
 
 (defn mouse-down-fn [raster-atom]
-
   (fn [mev]
     (println "MOUSE DOWN!!!!!???")
     (swap! raster-atom assoc :left-mouse-down true)))
 
 
 (defn mouse-up-fn [raster-atom]
-
   (fn [mev]
     (println "MOUSE UP!!!!!???")
     (swap! raster-atom assoc :left-mouse-down false)))
-
-
 
 
 (defn cell-state-to-color-index-fn
@@ -77,9 +73,6 @@
   case we just return true if the color index is > 0."
   [cell-state]
   (> (cell-state-to-color-index-fn cell-state) 0))
-
-
-
 
 
 (defonce raster-atom (atom (make-raster
@@ -98,14 +91,24 @@
 
 
 (def map-atoms {:a (atom {:as-atom "aaa"}) :b {:submap (atom "Beez!")}})
+(def paths-to-atoms-atom (atom []))
+(mc/print-section-break "DE-ATOMIZE TEST" 60)
+(print "map-atoms:\t\t\t\t" map-atoms)
 (pprint map-atoms)
-(def map-atoms-str (prn-str (mc/de-atomize map-atoms)))
-(println "map-atoms-str: " map-atoms-str)
-(def map-atoms-rehydrated (edn/read-string rcore/edn-readers map-atoms-str))
-(print "DESERIALIZED MAP: ")
-(pprint  map-atoms-rehydrated)
-(print "REHYDRATE MAP: ")
-(pprint (mc/atomize map-atoms-rehydrated))
+(def map-atoms-de-atomized (mc/de-atomize map-atoms [] paths-to-atoms-atom))
+(def map-atoms-de-atomized-str (prn-str map-atoms-de-atomized))
+(println "map-atoms-de-atomized:\t" map-atoms-de-atomized-str)
+(def map-atoms-rehydrated (edn/read-string rcore/edn-readers map-atoms-de-atomized-str))
+;;(print "DESERIALIZED MAP: ")
+;;(pprint  map-atoms-rehydrated)
+(print "LOCATIONS OF ATOMS: ")
+(pprint @paths-to-atoms-atom)
+(def re-hydrated-obj (mc/atomize map-atoms-rehydrated paths-to-atoms-atom))
+(print "REHYDRATED OBJ: ")
+(pprint re-hydrated-obj)
+(if (= re-hydrated-obj map-atoms)
+  (println "DEHYDRATE/REHYDRATE SUCCESSFUL!")
+  (println "DEHYDRATE/REHYDRATE FAILED!"))
 
 (defonce
   rasto-example-cfg {; :off-cell-color "#F5F5DC"
