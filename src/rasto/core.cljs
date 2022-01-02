@@ -47,6 +47,14 @@
 
 (defn make-raster
   "Constructor function for the Raster."
+  ([hmap]
+
+  (->Raster (:dimensions hmap) (:screen-dimensions hmap)
+            (:raw-data hmap) (:id hmap) (:hover-fn hmap) (:left-click-fn hmap)
+            (:right-click-fn hmap) (:cell-state-to-color-index-fn hmap)
+            (:cell-is-visible-fn hmap) (:brushes hmap) (:is-brush? hmap) (:color hmap)
+            (:parent-raster-atom hmap))
+   )
   ([[w h] [sw sh] default-value id
     hover-fn left-click-fn right-click-fn
     cell-state-to-color-index-fn cell-is-visible-fn]
