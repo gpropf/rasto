@@ -304,7 +304,7 @@
 
 (defn draw-cells-on-raster [raster cell-list offset opacity app-cfg id]
   (let [[offset-x offset-y] offset]
-    (println id " CELL-LIST: " cell-list)
+    #_(println id " CELL-LIST: " cell-list)
     (map (fn [[x y cell-state]]
            (let [cell-key (rut/key-to-string "cell" [x y])]
              ^{:key (rut/genkey "cell")}

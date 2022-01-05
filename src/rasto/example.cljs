@@ -26,7 +26,7 @@
                   (rut/position-relative-to-upper-left
                     mev (rut/key-to-string (:id raster))) raster)
           color (:color raster)]
-      (println "Mousing over " (:id raster) ":" [x y] "with color " color)
+      #_(println "Mousing over " (:id raster) ":" [x y] "with color " color)
       (when (:left-mouse-down raster) (reset! raster-atom (rcore/set-cell raster [x y] (+ 100 color))))
       (swap! raster-atom assoc :last-mouse-location [x y]))))
 
