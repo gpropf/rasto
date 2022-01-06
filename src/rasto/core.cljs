@@ -156,7 +156,7 @@
   {:new {:fn (fn [arg-map] (->Foo 4 5 6))
          :args {}}
    :delete {}} edn-readers)
-
+(def raster-re-hydration-map {"rasto.core/Raster" make-raster})
 
 
 (mc/register-application-defined-type
@@ -168,7 +168,7 @@
                       #_(mc/add-object-to-object-store raster-atom :Raster :rst1 nil)
                       (swap! mc/mui-state assoc :return-to-normal true)))
             :args {}}
-   :delete {}} edn-readers)
+   :delete {}} edn-readers raster-re-hydration-map)
 
 
 (mc/register-application-defined-type
@@ -214,9 +214,8 @@
                       ))
             :args {}
             :help {}
-
             }}
-  edn-readers)
+  edn-readers raster-re-hydration-map)
 
 
 (def rasto-cmd-maps {:key-sym-keystroke-map {:c [67 false false false false]
