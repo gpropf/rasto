@@ -155,7 +155,8 @@
   from here."
   []
   [:div {}
-   [raster-view raster-atom rasto-example-cfg {}]])
+   #_[raster-view raster-atom rasto-example-cfg {}]
+   [raster-view (:obj (mc/get-object-from-object-store :rst1)) rasto-example-cfg {}]])
 
 
 (defn render-app
