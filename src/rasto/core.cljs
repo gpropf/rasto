@@ -32,7 +32,7 @@
                    ])
 
 
-(mc/add-object-to-object-store footest0 :Foo :foo0 nil)
+#_(mc/add-object-to-object-store footest0 :Foo :foo0 nil)
 
 (defn raw-data-array
   "Returns a raw cell-array cleared to provided value."
